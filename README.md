@@ -44,6 +44,7 @@ conda install -y -c anaconda cmake
 conda install -y -c conda-forge ffmpeg
 pip install svgwrite svgpathtools cssutils torch-tools
 python setup.py install
+cd ..
 ```
 
 Install [picosvg](https://github.com/googlefonts/picosvg) for SVG cleaning:
