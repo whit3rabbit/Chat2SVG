@@ -1,0 +1,32 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Pot base -->
+  <ellipse id="path_1" cx="256" cy="400" rx="120" ry="40" fill="#8B4513"/>
+  <!-- Pot front -->
+  <path id="path_2" d="M136 400 Q256 430 376 400 L376 420 Q256 450 136 420 Z" fill="#6B3E26"/>
+  <!-- Soil surface -->
+  <path id="path_3" d="M146 395 Q256 385 366 395 Q256 405 146 395 Z" fill="#3B2F2F"/>
+  <!-- Tree trunk -->
+  <path id="path_4" d="M256 390 Q270 350 260 300 Q240 250 256 200 Q272 250 252 300 Q242 350 256 390 Z" fill="#8B4513"/>
+  <!-- Left branch -->
+  <path id="path_5" d="M256 300 Q230 280 220 240 Q215 220 210 200 Q225 210 230 240 Q235 270 256 300 Z" fill="#8B4513"/>
+  <!-- Right branch -->
+  <path id="path_6" d="M256 280 Q282 260 290 220 Q295 200 300 180 Q285 190 280 220 Q275 250 256 280 Z" fill="#8B4513"/>
+  <!-- Left root -->
+  <path id="path_7" d="M246 390 Q236 385 226 388 Q216 390 206 395 Z" fill="#8B4513"/>
+  <!-- Right root -->
+  <path id="path_8" d="M266 390 Q276 385 286 388 Q296 390 306 395 Z" fill="#8B4513"/>
+  <!-- Left leaf cluster -->
+  <circle id="path_9" cx="215" cy="205" r="15" fill="#228B22"/>
+  <circle id="path_10" cx="225" cy="220" r="12" fill="#32CD32"/>
+  <circle id="path_11" cx="205" cy="225" r="10" fill="#228B22"/>
+  <!-- Right leaf cluster -->
+  <circle id="path_12" cx="295" cy="185" r="15" fill="#228B22"/>
+  <circle id="path_13" cx="285" cy="200" r="12" fill="#32CD32"/>
+  <circle id="path_14" cx="305" cy="205" r="10" fill="#228B22"/>
+  <!-- Top leaf cluster -->
+  <circle id="path_15" cx="256" cy="180" r="12" fill="#228B22"/>
+  <circle id="path_16" cx="266" cy="195" r="10" fill="#32CD32"/>
+  <circle id="path_17" cx="246" cy="195" r="8" fill="#228B22"/>
+  <!-- Pot texture -->
+  <path id="path_18" d="M186 410 Q191 415 196 410 M226 420 Q231 425 236 420 M276 415 Q281 420 286 415 M316 425 Q321 430 326 425" fill="none" stroke="#A0522D" stroke-width="2"/>
+</svg>

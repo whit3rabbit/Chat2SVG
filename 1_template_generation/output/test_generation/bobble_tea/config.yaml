@@ -1,0 +1,11 @@
+model: claude-3-5-sonnet-20240620
+msg_dir: ./output/test_generation/bobble_tea/msg_logs
+output_folder: ./output/test_generation/bobble_tea
+output_path: output
+png_dir: ./output/test_generation/bobble_tea/png_logs
+prompt: A cup of bubble tea with a straw
+prompts_file: prompts
+refine_iter: 2
+svg_dir: ./output/test_generation/bobble_tea/svg_logs
+target: bobble_tea
+viewbox: 512

@@ -1,0 +1,18 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cup body -->
+  <path id="path_1" d="M180,150 Q180,400 256,400 Q332,400 332,150 Z" fill="none" stroke="#a0a0a0" stroke-width="3"/>
+  <!-- Cup lid -->
+  <path id="path_2" d="M170,150 Q213,130 256,130 Q299,130 342,150 Z" fill="#ffffff" stroke="#a0a0a0" stroke-width="3"/>
+  <!-- Milk tea liquid -->
+  <path id="path_3" d="M182,152 Q182,380 256,380 Q330,380 330,152 Z" fill="#C19A6B"/>
+  <!-- Tapioca pearls -->
+  <circle id="path_4" cx="200" cy="370" r="8" fill="#3A2718"/>
+  <circle id="path_5" cx="220" cy="375" r="8" fill="#3A2718"/>
+  <circle id="path_6" cx="240" cy="372" r="8" fill="#3A2718"/>
+  <circle id="path_7" cx="260" cy="374" r="8" fill="#3A2718"/>
+  <circle id="path_8" cx="280" cy="371" r="8" fill="#3A2718"/>
+  <!-- Straw body -->
+  <rect id="path_9" x="246" y="50" width="14" height="330" fill="#ffffff"/>
+  <!-- Straw stripes -->
+  <path id="path_10" d="M246,50 L260,70 M246,70 L260,90 M246,90 L260,110 M246,110 L260,130 M246,130 L260,150 M246,150 L260,170 M246,170 L260,190 M246,190 L260,210 M246,210 L260,230 M246,230 L260,250 M246,250 L260,270 M246,270 L260,290 M246,290 L260,310 M246,310 L260,330 Z" stroke="#FF9999" stroke-width="2"/>
+</svg>

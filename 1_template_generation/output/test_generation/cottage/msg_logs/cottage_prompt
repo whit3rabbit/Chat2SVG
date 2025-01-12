@@ -1,0 +1,33 @@
+###
+Scene Description:
+"A charming wooden cottage stands in a snow-covered forest clearing. Tall evergreen trees surround the cottage, their branches heavy with fresh snow. Smoke rises gently from the chimney, suggesting warmth within."
+
+Object Detail:
+# Object 1 (Cottage): The cottage has a sloped roof covered in snow, wooden walls with frosted windows, and a sturdy wooden door. A stone chimney protrudes from the roof, emitting a thin stream of smoke.
+# Object 2 (Trees): Several evergreen trees stand tall around the cottage, their branches laden with snow. The trees have triangular shapes with darker green visible beneath the white snow.
+# Object 3 (Snow): Snow blankets the ground and covers the trees and cottage roof. Small snowflakes continue to fall gently from the sky.
+
+Component Breakdown:
+# Object 1 (Cottage): rectangular wooden walls (rectangle), sloped roof (polygon), frosted windows (rectangles), wooden door (rectangle), stone chimney (rectangle), smoke (path)
+# Object 2 (Trees): triangular tree shapes (polygons), tree trunks (rectangles), snow-covered branches (polylines)
+# Object 3 (Snow): ground cover (rectangle), roof cover (polygon), falling snowflakes (circles)
+
+Key Components Layout:
+# Object 1: Cottage
+1. Walls: A rectangle centered at (256, 280), 180 units wide and 120 units tall. The walls are light brown (#D2B48C).
+2. Roof: A polygon with points at (166, 280), (346, 280), and (256, 200) to form a triangular roof. The roof is dark brown (#8B4513) with a white (#FFFFFF) overlay for snow.
+3. Windows: Two rectangles, each 30 units wide and 40 units tall, positioned at (206, 270) and (276, 270). The windows are light blue (#ADD8E6) to suggest frost.
+4. Door: A rectangle 40 units wide and 80 units tall, positioned at (236, 320). The door is dark brown (#8B4513).
+5. Chimney: A rectangle 20 units wide and 60 units tall, positioned at (306, 220). The chimney is gray (#808080).
+6. Smoke: A curved path starting from the top of the chimney at (316, 210) and curving upwards to (330, 170) and (350, 140).
+
+# Object 2: Trees
+1. Tree shapes: Multiple polygons with triangular shapes, varying in size, positioned around the cottage. The largest at (100, 300), (50, 450), (150, 450), another at (400, 320), (360, 450), (440, 450). Trees are dark green (#006400) with white (#FFFFFF) highlights for snow.
+2. Tree trunks: Rectangles about 20 units wide and 40 units tall, positioned at the base of each tree polygon.
+3. Snow-covered branches: White polylines extending from the sides of the tree polygons to represent snow-laden branches.
+
+# Object 3: Snow
+1. Ground cover: A rectangle covering the bottom third of the canvas, from y=350 to y=512, spanning the full width. The snow is white (#FFFFFF).
+2. Roof cover: A white polygon matching the shape of the roof, slightly smaller to show roof edges.
+3. Falling snow: Multiple small white circles, 2-3 units in diameter, scattered across the entire canvas to represent falling snowflakes.
+###

@@ -1,0 +1,11 @@
+model: claude-3-5-sonnet-20240620
+msg_dir: ./output/test_generation/cottage/msg_logs
+output_folder: ./output/test_generation/cottage
+output_path: output
+png_dir: ./output/test_generation/cottage/png_logs
+prompt: A cozy cottage nestled in a snowy forest
+prompts_file: prompts
+refine_iter: 2
+svg_dir: ./output/test_generation/cottage/svg_logs
+target: cottage
+viewbox: 512

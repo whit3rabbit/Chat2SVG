@@ -1,0 +1,11 @@
+model: claude-3-5-sonnet-20240620
+msg_dir: ./output/test_generation/bonsai/msg_logs
+output_folder: ./output/test_generation/bonsai
+output_path: output
+png_dir: ./output/test_generation/bonsai/png_logs
+prompt: A bonsai tree in a pot
+prompts_file: prompts
+refine_iter: 2
+svg_dir: ./output/test_generation/bonsai/svg_logs
+target: bonsai
+viewbox: 512

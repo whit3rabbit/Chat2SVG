@@ -1,0 +1,11 @@
+model: claude-3-5-sonnet-20240620
+msg_dir: ./output/test_generation/flamingo/msg_logs
+output_folder: ./output/test_generation/flamingo
+output_path: output
+png_dir: ./output/test_generation/flamingo/png_logs
+prompt: A walking flamingo
+prompts_file: prompts
+refine_iter: 2
+svg_dir: ./output/test_generation/flamingo/svg_logs
+target: flamingo
+viewbox: 512
