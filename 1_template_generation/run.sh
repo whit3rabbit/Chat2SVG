@@ -3,7 +3,7 @@ targets=(
     "flamingo"
     "cottage"
     "spaceship"
-    "bobble_tea"
+    "bubble_tea"
     "bonsai"
 )
 

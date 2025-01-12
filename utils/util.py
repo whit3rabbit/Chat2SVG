@@ -95,7 +95,7 @@ def get_prompt(target):
         "banana": "A yellow banana",
         "bat": "A black bat flying at night",
         "bell": "A bell with a red ribbon",
-        "bobble_tea": "A cup of bubble tea with a straw",
+        "bubble_tea": "A cup of bubble tea with a straw",
         "bonsai": "A bonsai tree in a pot",
         "bookshelf": "A bookshelf with books",
         "burger": "A cheeseburger with lettuce and tomato",
