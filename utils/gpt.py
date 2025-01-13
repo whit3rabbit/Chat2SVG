@@ -82,10 +82,18 @@ class Session:
         for image in images:
             base64_image = encode_image(image)
             image_content = {
-                "type": "image_url",
-                "image_url": {
-                    "url": base64_image,
-                    "detail": "auto",
+                ## ChatGPT
+                # "type": "image_url",
+                # "image_url": {
+                #     "url": base64_image,
+                #     "detail": "auto",
+                # }
+                # Claude
+                'type': 'image',
+                'source': {
+                    'type': 'base64',
+                    'media_type': 'image/png',
+                    'data': base64_image
                 }
             }
             messages["content"].append(image_content)
@@ -112,4 +120,5 @@ def encode_image(image_path: str):
 
     with open(image_path, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-        return f"data:{mime_type};base64,{encoded_string}"
+        # return f"data:{mime_type};base64,{encoded_string}"  # ChatGPT
+        return encoded_string  # Claude
