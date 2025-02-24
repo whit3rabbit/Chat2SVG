@@ -1,10 +1,11 @@
-experiment_name="example_generation"
+experiment_name="test_generation"
 targets=(
-    "flamingo"
-    # "cottage"
-    # "spaceship"
-    # "bubble_tea"
-    # "bonsai"
+    "apple"
+    "bonsai"
+    "daisy"
+    "ice_cream"
+    "lighthouse"
+    "penguin"
 )
 
 for target in "${targets[@]}"; do

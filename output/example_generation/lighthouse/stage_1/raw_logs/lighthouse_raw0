@@ -1,0 +1,73 @@
+Expanded Prompt:
+###
+Scene Description:
+"A tall white lighthouse stands proudly on a rocky cliff overlooking a vast blue sea. The lighthouse's bright beacon illuminates the night sky, while gentle waves crash against the shore below."
+
+Object Detail:
+# Object 1 (Lighthouse): The lighthouse is a tall, cylindrical structure with a white base and a red top. It has a glass dome at the top housing a powerful light. The lighthouse has several small windows along its body.
+# Object 2 (Cliff): The cliff is a rugged, brown rocky formation jutting out into the sea.
+# Object 3 (Sea): The sea is a deep blue expanse stretching to the horizon, with white-capped waves rolling towards the shore.
+# Object 4 (Sky): The night sky is a dark blue backdrop with a few twinkling stars.
+
+Component Breakdown:
+# Object 1 (Lighthouse): cylindrical white base (rect), red top section (polygon), glass dome (circle), light beam (polygon), windows (small rectangles)
+# Object 2 (Cliff): irregular brown shape (polygon)
+# Object 3 (Sea): large blue rectangle (rect), white wave crests (polyline)
+# Object 4 (Sky): dark blue background (rect), stars (small circles)
+
+Key Components Layout:
+# Sky: A dark blue rectangle covering the entire canvas
+# Stars: Small white circles scattered in the upper half of the canvas
+# Sea: A blue rectangle covering the bottom half of the canvas
+# Waves: White polylines near the bottom of the canvas
+# Cliff: A brown polygon in the lower right corner, extending from the bottom edge
+# Lighthouse: Positioned on top of the cliff, centered horizontally
+  - Base: A white rectangle for the main body
+  - Top: A red trapezoid shape on top of the base
+  - Dome: A small circle on top of the red section
+  - Light beam: A yellow triangle extending from the dome
+  - Windows: Small rectangles along the lighthouse body
+###
+
+```svg
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sky -->
+  <rect x="0" y="0" width="512" height="512" fill="#001f3f"/>
+  
+  <!-- Stars -->
+  <circle cx="50" cy="50" r="2" fill="#ffffff"/>
+  <circle cx="150" cy="80" r="2" fill="#ffffff"/>
+  <circle cx="250" cy="30" r="2" fill="#ffffff"/>
+  <circle cx="350" cy="70" r="2" fill="#ffffff"/>
+  <circle cx="450" cy="40" r="2" fill="#ffffff"/>
+  
+  <!-- Sea -->
+  <rect x="0" y="256" width="512" height="256" fill="#0074D9"/>
+  
+  <!-- Waves -->
+  <polyline points="0,480 50,470 100,480 150,470 200,480 250,470 300,480 350,470 400,480 450,470 512,480" fill="none" stroke="#ffffff" stroke-width="3"/>
+  
+  <!-- Cliff -->
+  <polygon points="300,512 512,512 512,400 450,380 400,390 350,370" fill="#8B4513"/>
+  
+  <!-- Lighthouse base -->
+  <rect x="380" y="200" width="80" height="200" fill="#ffffff"/>
+  
+  <!-- Lighthouse top -->
+  <polygon points="380,200 460,200 450,170 390,170" fill="#FF4136"/>
+  
+  <!-- Lighthouse dome -->
+  <circle cx="420" cy="160" r="20" fill="#DDDDDD"/>
+  
+  <!-- Light beam -->
+  <polygon points="420,160 320,60 520,60" fill="#FFDC00" fill-opacity="0.5"/>
+  
+  <!-- Windows -->
+  <rect x="400" y="240" width="15" height="20" fill="#7FDBFF"/>
+  <rect x="425" y="240" width="15" height="20" fill="#7FDBFF"/>
+  <rect x="400" y="290" width="15" height="20" fill="#7FDBFF"/>
+  <rect x="425" y="290" width="15" height="20" fill="#7FDBFF"/>
+  <rect x="400" y="340" width="15" height="20" fill="#7FDBFF"/>
+  <rect x="425" y="340" width="15" height="20" fill="#7FDBFF"/>
+</svg>
+```

@@ -1,0 +1,59 @@
+Expanded Prompt:
+###
+Scene Description:
+"A black and white emperor penguin stands upright on a large, flat ice sheet. The penguin's flippers are held close to its body, and its orange beak and feet contrast against the icy background."
+
+Object Detail:
+# Object 1 (Penguin): The emperor penguin has a black back, white belly, and orange beak. Its flippers are black on the outside and white on the inside. The penguin has distinctive orange feet with black claws.
+# Object 2 (Ice Sheet): The ice sheet is a large, flat surface with a light blue tint. It has slight variations in color to suggest texture and depth.
+
+Component Breakdown:
+# Object 1 (Penguin): oval body (ellipse), rounded head (circle), triangular beak (polygon), flipper arms (polygon), orange feet (polygon), white belly patch (ellipse), small black eyes (circle)
+# Object 2 (Ice Sheet): large flat surface (rectangle), texture variations (multiple small polygons)
+
+Key Components Layout:
+# Object 1: Penguin
+1. Body: A large black ellipse centered at (256, 256), 120 units tall and 80 units wide.
+2. Head: A black circle with a radius of 40 units, centered at (256, 176).
+3. Belly: A white ellipse slightly smaller than the body, centered at (256, 276), 100 units tall and 60 units wide.
+4. Beak: An orange triangle positioned at (256, 196) with points (246, 206), (256, 216), (266, 206).
+5. Flippers: Two black polygons on either side of the body, positioned at (216, 246) and (296, 246).
+6. Feet: Two orange polygons at the bottom of the body, centered at (236, 356) and (276, 356).
+7. Eyes: Two small black circles with a radius of 5 units, centered at (241, 171) and (271, 171).
+
+# Object 2: Ice Sheet
+1. Base: A large light blue rectangle covering the bottom third of the canvas, from y=340 to y=512.
+2. Texture: Several small, slightly darker blue polygons scattered across the ice sheet to create depth and texture.
+
+###
+
+```svg
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ice sheet base -->
+  <rect x="0" y="340" width="512" height="172" fill="#e6f3ff"/>
+  <!-- Ice texture -->
+  <polygon points="50,360 80,380 30,390" fill="#d6e9ff"/>
+  <polygon points="200,370 230,390 180,400" fill="#d6e9ff"/>
+  <polygon points="400,350 430,370 380,380" fill="#d6e9ff"/>
+  <!-- Penguin body -->
+  <ellipse cx="256" cy="256" rx="40" ry="60" fill="#000000"/>
+  <!-- Penguin belly -->
+  <ellipse cx="256" cy="276" rx="30" ry="50" fill="#ffffff"/>
+  <!-- Penguin head -->
+  <circle cx="256" cy="176" r="40" fill="#000000"/>
+  <!-- Penguin beak -->
+  <polygon points="246,206 256,216 266,206" fill="#ffa500"/>
+  <!-- Penguin left flipper -->
+  <polygon points="216,246 196,296 216,346" fill="#000000"/>
+  <!-- Penguin right flipper -->
+  <polygon points="296,246 316,296 296,346" fill="#000000"/>
+  <!-- Penguin left foot -->
+  <polygon points="226,356 246,356 236,376" fill="#ffa500"/>
+  <!-- Penguin right foot -->
+  <polygon points="266,356 286,356 276,376" fill="#ffa500"/>
+  <!-- Penguin left eye -->
+  <circle cx="241" cy="171" r="5" fill="#ffffff"/>
+  <!-- Penguin right eye -->
+  <circle cx="271" cy="171" r="5" fill="#ffffff"/>
+</svg>
+```

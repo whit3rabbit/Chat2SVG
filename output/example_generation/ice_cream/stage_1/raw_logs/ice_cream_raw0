@@ -1,0 +1,35 @@
+Expanded Prompt:
+###
+Scene Description:
+"A colorful ice cream cone stands upright, adorned with three round scoops of different flavors stacked on top of each other."
+
+Object Detail:
+# Object 1 (Ice Cream Cone): The cone is a golden-brown waffle cone with a pointed bottom and a wide circular top.
+# Object 2 (Ice Cream Scoops): Three round scoops of ice cream sit atop the cone. From bottom to top: a pink strawberry scoop, a brown chocolate scoop, and a white vanilla scoop.
+
+Component Breakdown:
+# Object 1 (Ice Cream Cone): Triangular waffle cone body (polygon)
+# Object 2 (Ice Cream Scoops): Three circular scoops (circles)
+
+Key Components Layout:
+# Object 1: Ice Cream Cone
+1. Cone: A golden-brown triangle with its base at the top, centered at the bottom of the canvas. The triangle's points are at (256, 400), (206, 250), and (306, 250).
+
+# Object 2: Ice Cream Scoops
+1. Bottom Scoop (Strawberry): A pink circle centered at (256, 220) with a radius of 60 units.
+2. Middle Scoop (Chocolate): A brown circle centered at (256, 150) with a radius of 55 units.
+3. Top Scoop (Vanilla): A white circle centered at (256, 90) with a radius of 50 units.
+###
+
+```svg
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ice cream cone -->
+  <polygon points="256,400 206,250 306,250" fill="#D2691E"/>
+  <!-- Bottom strawberry scoop -->
+  <circle cx="256" cy="220" r="60" fill="#FFB6C1"/>
+  <!-- Middle chocolate scoop -->
+  <circle cx="256" cy="150" r="55" fill="#8B4513"/>
+  <!-- Top vanilla scoop -->
+  <circle cx="256" cy="90" r="50" fill="#FFFAF0"/>
+</svg>
+```

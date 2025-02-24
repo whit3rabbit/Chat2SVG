@@ -55,14 +55,14 @@ cd ..
 
 > [!TIP]
 > We provide two ways to generate SVG templates:
-> 1. If you want to [**create high-quality SVG**](#step-by-step-pipeline), we recommend checking the output of each stage to ensure the generated SVG meet "human-preferred" criteria.
-> 2. If you want to [**compare the performance**](#automated-pipeline) of our method with your own SVG generation method, we also provide a simple way to automatically generate all outputs.
+> 1. If you want to **create high-quality SVG**, we recommend checking the output of each stage to ensure the generated SVG meet "human-preferred" criteria.
+> 2. If you want to **compare the performance** of our method with your own SVG generation method, we also provide a simple way to automatically generate all outputs.
 
 ## Step-By-Step Pipeline (For High-Quality SVG 🎨)
 
 First, paste your Anthropic API key into the `.env` file:
 ```shell
-API_KEY=<your_key>
+OPENAI_API_KEY=<your_key>
 ```
 
 Then, run the following command to generate SVG templates:
