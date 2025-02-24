@@ -10,8 +10,7 @@ from utils.util import read
 
 # Create a .env file in the project root directory and add your Anthropic API key as ANTHROPIC_API_KEY=<your_key>
 load_dotenv(dotenv_path=os.path.join("..", ".env"))
-api_key = os.getenv("API_KEY")
-
+api_key = os.getenv("OPENAI_API_KEY")
 
 class Session:
     def __init__(self, model, prompts_file) -> None:
@@ -66,7 +65,7 @@ class Session:
             try:
                 response = response.json()['choices'][0]['message']['content']
             except:
-                print(f"$ --- Error Response:\n{response.json()}\n")
+                print(f"$ --- Error Response: {response.json()}\n")
         else:
             response = read(file_path)
         self.past_messages.append({"role": "assistant", "content": response})

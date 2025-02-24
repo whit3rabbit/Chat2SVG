@@ -21,10 +21,6 @@ Clone the repository:
 ```shell
 git clone git@github.com:kingnobro/Chat2SVG.git
 cd Chat2SVG
-```
-
-Create a new conda environment:
-```shell
 conda create --name chat2svg python=3.10
 conda activate chat2svg
 ```
@@ -57,7 +53,12 @@ cd ..
 
 ## Pipeline 🖌
 
-### Stage 1: Template Generation
+> [!TIP]
+> We provide two ways to generate SVG templates:
+> 1. If you want to [**create high-quality SVG**](#step-by-step-pipeline), we recommend checking the output of each stage to ensure the generated SVG meet "human-preferred" criteria.
+> 2. If you want to [**compare the performance**](#automated-pipeline) of our method with your own SVG generation method, we also provide a simple way to automatically generate all outputs.
+
+## Step-By-Step Pipeline (For High-Quality SVG 🎨)
 
 First, paste your Anthropic API key into the `.env` file:
 ```shell
@@ -69,13 +70,16 @@ Then, run the following command to generate SVG templates:
 cd 1_template_generation
 bash run.sh
 ```
-In `run.sh`, the detailed prompts of each target object can be found in `utils/util.py`.
+In `run.sh`, the detailed prompts of each target object can be found in `utils/util.py → get_prompt()`. Results will be saved in `../output/example_generation/`. To visualize the results, we recommend using the [SVG](https://marketplace.visualstudio.com/items?itemName=jock.svg) and [SVG Editor](https://marketplace.visualstudio.com/items?itemName=henoc.svgeditor) plugins of VSCode.
 
 > [!CAUTION]
-> Hong Kong is banned by Anthropic/OpenAI. Therefore, I use a third-party API from [WildCard](https://bewildcard.com/) (not recommended, since they cannot provide receipts) to forward requests to Claude. If you are in a region where you can access Anthropic/OpenAI directly, you can modify lines 64-65 in `utils/gpt.py` to use the original Anthropic API. Additional modifications may be required. Sorry for the inconvenience.
+> Hong Kong is banned by Anthropic/OpenAI. Therefore, I use a third-party API from [WildCard](https://bewildcard.com/) to forward requests to Claude. If you are in a region where you can access Anthropic/OpenAI directly, you can modify lines 64-65 in `utils/gpt.py` to use the original Anthropic API. Additional modifications may be required. Sorry for the inconvenience.
 
 ### Stage 2: Detail Enhancement
 This stage enhances the initial SVG templates with additional visual details using image diffusion models. Code coming soon.
 
 ### Stage 3: SVG Shape Optimization
 The final stage optimizes the SVG shapes for improved visual quality. Code coming soon.
+
+## Automated Pipeline (For Comparison ⚖️)
+Code coming soon.

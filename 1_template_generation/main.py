@@ -17,10 +17,10 @@ def parse_arguments():
 
     args.prompt = get_prompt(args.target)
     # Set up output directories
-    args.output_folder = f"./{args.output_path}/{args.output_folder}"
+    args.output_folder = f"../{args.output_path}/{args.output_folder}/stage_1"
     args.svg_dir = f"{args.output_folder}/svg_logs"
     args.png_dir = f"{args.output_folder}/png_logs"
-    args.msg_dir = f"{args.output_folder}/msg_logs"
+    args.msg_dir = f"{args.output_folder}/raw_logs"
     for dir in [args.output_folder, args.svg_dir, args.png_dir, args.msg_dir]:
         os.makedirs(dir, exist_ok=True)
     
@@ -37,7 +37,7 @@ def parse_arguments():
 
 def main(cfg):
     session = gpt.Session(model=cfg.model, prompts_file=cfg.prompts_file)
-    msg_path = lambda i: f"{cfg.msg_dir}/{cfg.target}_msg{i}"
+    msg_path = lambda i: f"{cfg.msg_dir}/{cfg.target}_raw{i}"
 
     # Task 1: Expand the Text Prompt
     expanded_text_prompt = session.send("expand_text_prompt", {"text_prompt": cfg.prompt}, file_path=f"{cfg.msg_dir}/{cfg.target}_prompt")
