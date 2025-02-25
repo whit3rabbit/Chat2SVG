@@ -6,6 +6,8 @@ png_dir: ../output/example_generation/ice_cream/stage_1/png_logs
 prompt: An ice cream cone with three scoops
 prompts_file: prompts
 refine_iter: 2
+reward_model: ImageReward
+root_dir: ../output/example_generation/ice_cream
 svg_dir: ../output/example_generation/ice_cream/stage_1/svg_logs
 target: ice_cream
 viewbox: 512

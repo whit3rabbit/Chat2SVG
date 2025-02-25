@@ -2,7 +2,13 @@ import sys, os, argparse, yaml, shutil
 sys.path.append("../")
 
 import utils.gpt as gpt
-from utils.util import save, log, get_prompt, save_svg
+from utils.util import save, get_prompt, save_svg
+
+import torch
+import clip
+import ImageReward as RM
+import glob
+from PIL import Image
 
 
 def parse_arguments():
@@ -13,11 +19,13 @@ def parse_arguments():
     parser.add_argument("--viewbox", type=int, default=512)
     parser.add_argument("--refine_iter", type=int, default=2)
     parser.add_argument("--model", type=str, default="claude-3-5-sonnet-20240620")
+    parser.add_argument("--reward_model", type=str, default="ImageReward")
     args = parser.parse_args()
 
     args.prompt = get_prompt(args.target)
     # Set up output directories
-    args.output_folder = f"../{args.output_path}/{args.output_folder}/stage_1"
+    args.root_dir = f"../{args.output_path}/{args.output_folder}"
+    args.output_folder = f"{args.root_dir}/stage_1"
     args.svg_dir = f"{args.output_folder}/svg_logs"
     args.png_dir = f"{args.output_folder}/png_logs"
     args.msg_dir = f"{args.output_folder}/raw_logs"
@@ -33,6 +41,48 @@ def parse_arguments():
     shutil.copyfile(f"../{args.prompts_file}.yaml", f"{args.output_folder}/prompts.yaml")
 
     return args
+
+
+def select_best_svg(cfg, model_name='ImageReward'):
+    assert model_name in ['ImageReward', 'CLIP'], "Only `ImageReward` and `CLIP` are supported"
+
+    # Load appropriate model
+    if model_name == 'ImageReward':
+        model = RM.load("ImageReward-v1.0")
+    else:  # CLIP
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        model, preprocess = clip.load("ViT-B/32", device=device)
+    
+    png_files = sorted(glob.glob(f"{cfg.png_dir}/*.png"))
+    prompt = cfg.prompt
+
+    # Get ranking based on selected model
+    with torch.no_grad():
+        if model_name == 'ImageReward':
+            ranking, _ = model.inference_rank(prompt, png_files)
+            best_index = ranking[0] - 1  # ImageReward uses 1-based indexing
+        else:  # CLIP
+            device = next(model.parameters()).device  # Get device from model
+            
+            # Process images and text
+            images = torch.cat([preprocess(Image.open(png_file)).unsqueeze(0) 
+                               for png_file in png_files]).to(device)
+            text = clip.tokenize([prompt]).to(device)
+            
+            # Compute normalized features and similarity
+            image_features = model.encode_image(images)
+            text_features = model.encode_text(text)
+            image_features /= image_features.norm(dim=-1, keepdim=True)
+            text_features /= text_features.norm(dim=-1, keepdim=True)
+            
+            # Get ranking
+            similarity = (100.0 * image_features @ text_features.T).squeeze()
+            best_index = similarity.argmax().item()
+    
+    # Copy the best SVG to the root directory
+    best_svg = f"{cfg.target}_{best_index}.svg"
+    print(f"The best SVG is: {best_svg}")
+    shutil.copy(f"{cfg.svg_dir}/{best_svg}", f"{cfg.root_dir}/{cfg.target}.svg")
 
 
 def main(cfg):
@@ -58,7 +108,10 @@ def main(cfg):
         svg_path = f"{cfg.svg_dir}/{cfg.target}_{i}.svg"
         png_path = f"{cfg.png_dir}/{cfg.target}_{i}.png"
 
-    log("Done!")
+    # Automatically select the best SVG
+    print("======== Selecting the best SVG using ImageReward or CLIP ========")
+    select_best_svg(cfg, model_name=cfg.reward_model)
+    print("Done!")
 
 if __name__ == '__main__':
     cfg = parse_arguments()

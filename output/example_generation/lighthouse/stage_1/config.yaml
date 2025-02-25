@@ -6,6 +6,8 @@ png_dir: ../output/example_generation/lighthouse/stage_1/png_logs
 prompt: A lighthouse by the sea
 prompts_file: prompts
 refine_iter: 2
+reward_model: ImageReward
+root_dir: ../output/example_generation/lighthouse
 svg_dir: ../output/example_generation/lighthouse/stage_1/svg_logs
 target: lighthouse
 viewbox: 512

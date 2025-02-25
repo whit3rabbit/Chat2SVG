@@ -1,4 +1,4 @@
-experiment_name="test_generation"
+experiment_name="example_generation"
 targets=(
     "apple"
     "bonsai"

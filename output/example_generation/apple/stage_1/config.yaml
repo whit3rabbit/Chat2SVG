@@ -6,6 +6,8 @@ png_dir: ../output/example_generation/apple/stage_1/png_logs
 prompt: A red apple with green leaves and stems
 prompts_file: prompts
 refine_iter: 2
+reward_model: ImageReward
+root_dir: ../output/example_generation/apple
 svg_dir: ../output/example_generation/apple/stage_1/svg_logs
 target: apple
 viewbox: 512

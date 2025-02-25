@@ -6,6 +6,8 @@ png_dir: ../output/example_generation/bonsai/stage_1/png_logs
 prompt: A bonsai tree in a pot
 prompts_file: prompts
 refine_iter: 2
+reward_model: ImageReward
+root_dir: ../output/example_generation/bonsai
 svg_dir: ../output/example_generation/bonsai/stage_1/svg_logs
 target: bonsai
 viewbox: 512

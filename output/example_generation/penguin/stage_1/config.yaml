@@ -6,6 +6,8 @@ png_dir: ../output/example_generation/penguin/stage_1/png_logs
 prompt: A penguin standing on ice
 prompts_file: prompts
 refine_iter: 2
+reward_model: ImageReward
+root_dir: ../output/example_generation/penguin
 svg_dir: ../output/example_generation/penguin/stage_1/svg_logs
 target: penguin
 viewbox: 512
