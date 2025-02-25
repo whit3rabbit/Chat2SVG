@@ -27,7 +27,7 @@ conda activate chat2svg
 
 Install PyTorch and other dependencies:
 ```shell
-pip3 install torch torchvision torchaudio
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
 pip install -r requirements.txt
 ```
 
