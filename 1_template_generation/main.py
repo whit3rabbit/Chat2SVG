@@ -24,7 +24,7 @@ def parse_arguments():
 
     args.prompt = get_prompt(args.target)
     # Set up output directories
-    args.root_dir = f"../{args.output_path}/{args.output_folder}"
+    args.root_dir = f"{args.output_path}/{args.output_folder}"
     args.output_folder = f"{args.root_dir}/stage_1"
     args.svg_dir = f"{args.output_folder}/svg_logs"
     args.png_dir = f"{args.output_folder}/png_logs"

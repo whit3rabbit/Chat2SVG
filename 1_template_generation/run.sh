@@ -9,7 +9,7 @@ targets=(
 )
 
 for target in "${targets[@]}"; do
-    output_path="output"
+    output_path="../output"
     output_folder="${experiment_name}/${target}"
 
     python main.py \

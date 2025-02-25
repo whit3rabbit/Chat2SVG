@@ -1,7 +1,7 @@
 model: claude-3-5-sonnet-20240620
 msg_dir: ../output/example_generation/ice_cream/stage_1/raw_logs
 output_folder: ../output/example_generation/ice_cream/stage_1
-output_path: output
+output_path: ../output
 png_dir: ../output/example_generation/ice_cream/stage_1/png_logs
 prompt: An ice cream cone with three scoops
 prompts_file: prompts
