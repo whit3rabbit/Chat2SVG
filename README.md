@@ -27,7 +27,7 @@ conda activate chat2svg
 
 Install PyTorch and other dependencies:
 ```shell
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
+pip3 install torch torchvision torchaudio
 pip install -r requirements.txt
 ```
 
@@ -60,6 +60,8 @@ cd ..
 
 ## Step-By-Step Pipeline (For High-Quality SVG 🎨)
 
+### Stage 1: Template Generation
+
 First, paste your Anthropic API key into the `.env` file:
 ```shell
 OPENAI_API_KEY=<your_key>
@@ -71,6 +73,8 @@ cd 1_template_generation
 bash run.sh
 ```
 In `run.sh`, the detailed prompts of each target object can be found in `utils/util.py → get_prompt()`. Results will be saved in `../output/example_generation/`. To visualize the results, we recommend using the [SVG](https://marketplace.visualstudio.com/items?itemName=jock.svg) and [SVG Editor](https://marketplace.visualstudio.com/items?itemName=henoc.svgeditor) plugins of VSCode.
+
+Since multiple SVG templates are generated, we need to select the best one for the next stage. We use ImageReward or CLIP to select the best SVG template and save it in the root directory. You can also manually select the best SVG template based on your own preference.
 
 > [!CAUTION]
 > Hong Kong is banned by Anthropic/OpenAI. Therefore, I use a third-party API from [WildCard](https://bewildcard.com/) to forward requests to Claude. If you are in a region where you can access Anthropic/OpenAI directly, you can modify lines 64-65 in `utils/gpt.py` to use the original Anthropic API. Additional modifications may be required. Sorry for the inconvenience.

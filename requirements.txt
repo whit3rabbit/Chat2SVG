@@ -28,3 +28,8 @@ safetensors
 datasets
 scikit-learn
 kornia
+ftfy
+regex
+tqdm
+clip @ git+https://github.com/openai/CLIP.git
+image-reward
