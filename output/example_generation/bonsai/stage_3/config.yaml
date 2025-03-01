@@ -1,0 +1,61 @@
+c1_loss_weight_point: 0.0
+curvature_loss_weight_end_point: 0.1
+curvature_loss_weight_img: 0.01
+curvature_loss_weight_start_point: 2.0
+enable_path_iou_loss: false
+epoch_img_optim: 500
+epoch_latent_inversion: 500
+epoch_point_optim: 500
+initial_stroke_width: 0.8
+kl_weight_img: 0.2
+kl_weight_latent: 0.1
+log_every: 100
+lr_config_img:
+  color: 0.2
+  latent: 0.03
+  rotation: 0.003
+  scale: 0.003
+  stroke_color: 0.1
+  stroke_width: 0.1
+  translation: 0.1
+lr_config_latent:
+  color: 0
+  latent: 0.1
+  rotation: 0.06
+  scale: 0.5
+  stroke_color: 0
+  stroke_width: 0
+  translation: 5.0
+lr_config_point:
+  color: 0.2
+  points: 0.5
+  stroke_color: 0.1
+  stroke_width: 0.1
+max_total_len: 40
+mse_loss_weight_img: 2000.0
+mse_loss_weight_point: 2000.0
+num_warmup_steps: 100
+optim_color: true
+optim_opacity: false
+optim_stroke_color: true
+optim_stroke_width: true
+output_folder: ../output/example_generation/bonsai/stage_3
+output_size: 256
+path_iou_loss_weight_img: 1.0
+path_mask_dir: ../output/example_generation/bonsai/stage_3/path_mask
+png_dir: ../output/example_generation/bonsai/stage_3/latent_png
+png_point_dir: ../output/example_generation/bonsai/stage_3/point_png
+samples_per_cubic: 64
+seed: 42
+smoothness_loss_weight_point: 0.0
+smoothness_weight_img: 2.0
+smoothness_weight_latent: 0.0
+svg_dir: ../output/example_generation/bonsai/stage_3/latent_svg
+svg_folder: ../output/example_generation/bonsai
+svg_latent_optim_path: ../output/example_generation/bonsai/bonsai_optim_latent.svg
+svg_point_dir: ../output/example_generation/bonsai/stage_3/point_svg
+svg_point_optim_path: ../output/example_generation/bonsai/bonsai_optim_point.svg
+target: bonsai
+target_image_path: ../output/example_generation/bonsai/bonsai_target.png
+vae_optim_config: ./configs/vae_config_cmd_10.yaml
+vae_pretrained_path: ./vae_model/cmd_10.pth

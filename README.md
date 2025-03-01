@@ -13,7 +13,7 @@ Chat2SVG is a framework for generating vector graphics using large language mode
 ## TODO List
 - [x] SVG template generation with Large Language Models
 - [x] Detail enhancement with image diffusion models
-- [ ] SVG shape optimization
+- [x] SVG shape optimization
 
 
 ## Setup
@@ -108,7 +108,16 @@ The above command will:
 
 
 ### Stage 3: SVG Shape Optimization
-The final stage optimizes the SVG shapes for improved visual quality. Code coming soon.
+```shell
+cd 3_svg_optimization
+bash download_models.sh  # download pretrained SVG VAE model
+bash run.sh              # optimize SVG shapes (GPU consumption: less than 4GB)
+```
+
+> [!TIP]
+> 1. We turn off `enable_path_iou_loss` by default, which can greatly improve time efficiency. To avoid path semantic meaning shifts, you can set it to `True`.
+> 2. We appropriately scale up the loss weights (different from the paper) to ensure faster convergence.
+> 3. Results: `apple_optim_point.svg`
 
 ## Automated Pipeline (For Comparison ⚖️)
-Code coming soon.
+Code coming soon. Alternatively, you can enter each folder and run the `run.sh` script to generate all outputs.

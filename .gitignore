@@ -155,3 +155,5 @@ cython_debug/
 # Chat2SVG
 models/
 sam/
+cmd_10.pth
+.DS_Store
