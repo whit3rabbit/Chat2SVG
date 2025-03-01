@@ -12,7 +12,7 @@ Chat2SVG is a framework for generating vector graphics using large language mode
 
 ## TODO List
 - [x] SVG template generation with Large Language Models
-- [ ] Detail enhancement with image diffusion models
+- [x] Detail enhancement with image diffusion models
 - [ ] SVG shape optimization
 
 
@@ -27,7 +27,8 @@ conda activate chat2svg
 
 Install PyTorch and other dependencies:
 ```shell
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
+conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1  pytorch-cuda=11.8 -c pytorch -c nvidia
+pip install git+https://github.com/facebookresearch/segment-anything.git
 pip install -r requirements.txt
 ```
 
@@ -58,6 +59,9 @@ cd ..
 > 1. If you want to **create high-quality SVG**, we recommend checking the output of each stage to ensure the generated SVG meet "human-preferred" criteria.
 > 2. If you want to **compare the performance** of our method with your own SVG generation method, we also provide a simple way to automatically generate all outputs.
 
+> [!CAUTION]
+> Hong Kong is banned by Anthropic/OpenAI. Therefore, I use a third-party API from [WildCard](https://bewildcard.com/) to forward requests to Claude. If you are in a region where you can access Anthropic/OpenAI directly, you can modify lines 64-65 in `utils/gpt.py` to use the original Anthropic API. Additional modifications may be required. Sorry for the inconvenience.
+
 ## Step-By-Step Pipeline (For High-Quality SVG 🎨)
 
 ### Stage 1: Template Generation
@@ -72,15 +76,36 @@ Then, run the following command to generate SVG templates:
 cd 1_template_generation
 bash run.sh
 ```
-In `run.sh`, the detailed prompts of each target object can be found in `utils/util.py → get_prompt()`. Results will be saved in `../output/example_generation/`. To visualize the results, we recommend using the [SVG](https://marketplace.visualstudio.com/items?itemName=jock.svg) and [SVG Editor](https://marketplace.visualstudio.com/items?itemName=henoc.svgeditor) plugins of VSCode.
+- The detailed prompts of each target object can be found in `utils/util.py → get_prompt()`.
+- Output files will be saved in `output/example_generation/`, `stage_1` folder.
+- To visualize/edit the SVG results, we recommend using the [SVG](https://marketplace.visualstudio.com/items?itemName=jock.svg) and [SVG Editor](https://marketplace.visualstudio.com/items?itemName=henoc.svgeditor) plugins of VSCode.
+- Since multiple SVG templates are generated, we need to select the best one for the next stage. We use [ImageReward](https://github.com/THUDM/ImageReward) or [CLIP](https://github.com/openai/CLIP) to select the best SVG template. You can also manually select the best SVG template based on your own preference.
+- Finally, there should be a `target_name.svg` (e.g., `apple.svg`) file in the root directory.
 
-Since multiple SVG templates are generated, we need to select the best one for the next stage. We use ImageReward or CLIP to select the best SVG template and save it in the root directory. You can also manually select the best SVG template based on your own preference.
-
-> [!CAUTION]
-> Hong Kong is banned by Anthropic/OpenAI. Therefore, I use a third-party API from [WildCard](https://bewildcard.com/) to forward requests to Claude. If you are in a region where you can access Anthropic/OpenAI directly, you can modify lines 64-65 in `utils/gpt.py` to use the original Anthropic API. Additional modifications may be required. Sorry for the inconvenience.
+> [!TIP]
+> Our visual rectification process can solve common issues in SVG. However, we've observed that in some cases, VLM may actually degrade the quality of the SVG during rectification. We recommend double-checking the output before and after rectification to ensure the best results.
 
 ### Stage 2: Detail Enhancement
-This stage enhances the initial SVG templates with additional visual details using image diffusion models. Code coming soon.
+
+```shell
+cd 2_detail_enhancement
+bash download_models.sh  # download pretrained model weights
+bash run.sh              # detail enhancement
+```
+
+The above command will:
+- clean SVG templates using picosvg (convert shapes to cubic Bézier curves),
+- generate target images using [SDXL](https://civitai.com/models/269232/aam-xl-anime-mix) and [ControlNet](https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0),
+- use [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything) to add new shapes.
+- Output files: `apple_clean.svg`, `apple_target.png`, `apple_with_new_shape.svg`
+
+> [!TIP]
+> 1. Adjust the `strength` to control the strength of the detail enhancement. We recommend `0.75` for mild enhancement and `1.0` for strong enhancement.
+> 2. The default number of generated target images is 4, and we select the **first one** as the default target image. You can check all generated images to select your preferred one.
+> 3. Adjust `points_per_side` in SAM to control the granularity of the added shapes.
+> 4. Adjust `thresh_iou` in SAM to control the threshold that determines whether a shape is a new shape or not.
+> 5. As mentioned in the paper's limitation section, SAM sometimes may not add appropriate shapes. Please check the output and modify if necessary.
+
 
 ### Stage 3: SVG Shape Optimization
 The final stage optimizes the SVG shapes for improved visual quality. Code coming soon.

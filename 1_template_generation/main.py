@@ -82,7 +82,7 @@ def select_best_svg(cfg, model_name='ImageReward'):
     # Copy the best SVG to the root directory
     best_svg = f"{cfg.target}_{best_index}.svg"
     print(f"The best SVG is: {best_svg}")
-    shutil.copy(f"{cfg.svg_dir}/{best_svg}", f"{cfg.root_dir}/{cfg.target}.svg")
+    shutil.copy(f"{cfg.svg_dir}/{best_svg}", f"{cfg.root_dir}/{cfg.target}_template.svg")
 
 
 def main(cfg):

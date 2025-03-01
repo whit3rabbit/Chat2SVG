@@ -4,7 +4,7 @@ python-dotenv
 pillow
 IPython
 shapely
-moviepy
+moviepy==1.0.3
 networkx
 cairosvg
 matplotlib
@@ -31,5 +31,6 @@ kornia
 ftfy
 regex
 tqdm
+rasterio
 clip @ git+https://github.com/openai/CLIP.git
 image-reward
