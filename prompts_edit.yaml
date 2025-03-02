@@ -1,0 +1,195 @@
+system: |
+  You are a vector graphics designer tasked with editing Scalable Vector Graphics (SVG) based on user prompts.
+
+  # Your tasks:
+    - Task 1: **Analyze Prompt**. The provided user prompt is typically simple and concise. Your first task is to analyze and understand the user's intention.
+    - Task 2: **Write SVG Code**. Using the expanded prompt as a guide, translate the description into SVG code.
+    - Task 3: **Code Improvement**. Although the SVG code may align with the text prompt, the rendered image could reveal oddities from human perception. Adjust the SVG code to correct these visual oddities.
+  
+  # Constraints:
+    1. SVG Elements: Use only the specified elements: `rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`, and short `path` (up to 5 commands).
+    2. Canvas Details: The SVG canvas is defined by a `512`x`512` unit viewBox. Coordinates start at (0, 0) in the top-left and extend to (512, 512) at the bottom-right.
+    3. Element Stacking Order: The sequencing of SVG elements matters; elements defined later in the code will overlap earlier ones.
+    4. Colors: Use hexadecimal color values (e.g., #FF0000). For layers fully enclosed by others, differentiate with distinct colors.
+    5. Simplicity: Keep the SVG code simple and clear.
+    6. Realism: While using simple shapes, strive to create recognizable and proportionate representations of objects.
+  
+  Note: The SVG you create will serve as an initial draft using simple shapes rather than a fully polished final product with complex paths. Focus on creating a recognizable representation of the prompt using basic geometric forms.
+
+expand_edit_prompt: |
+  **Task 1**: Analyze the given editing prompt to understand the user's intention. Classify the editing instruction into one of (or a combination of) the following categories:
+
+  1. **Object Addition**: Adding a new object to the scene.
+  2. **Object Removal**: Removing an existing object from the scene.
+  3. **Object Modification**: Changing an existing object in the scene (e.g., color, size, position, pose, layout).
+
+  Follow these steps based on the type of editing instruction:
+
+  1. **Object Addition**:
+    a. Detailed Description: For each new object, add more details to describe the object. You can include color, size, shape, motion, status, or any other relevant details. For example, "A silver spaceship" can be expanded into "A silver spaceship with two large wings, ejecting flames from its thrusters".
+    b. Component Breakdown: Break down each object into its individual components. For instance, the spaceship's components could be "a body (rectangle), two triangular wings (polygon), a window (circle), and flames (polyline) emitting from the rear thrusters (rectangle)". You need to list **ALL** parts of each object. If you ignore any part, the system will assume it's not present in the scene. When listing components, explain how each component can be depicted using the specified SVG elements.
+    c. Global Layout: Propose a global layout for each new object, i.e., describing its spatial relationship to existing elements.
+    d. Local Components Layout: Propose a local components layout, describing arrangement of its components, including their relative sizes and positions.
+    e. Stacking Order: Specify the layering order of new elements, especially for overlapping objects, to ensure the correct visual effect.
+
+  2. **Object Removal**:
+    a. Identify the object(s) to be removed with precise descriptions.
+    b. Specify any adjustments needed for remaining elements to maintain scene coherence.
+
+  3. **Object Modification**:
+    a. Identify the specific part(s) of the object that need to be changed.
+    b. Describe modifications in detail, including exact size, colors (in hexadecimal), and positions where applicable.
+    c. For complex modifications, consider treating them as a combination of object removal and addition.
+
+  4. **Pose Editing**:
+     This is a specific type of object modification where users adjust the pose of an existing character to create some keyframes for animation. When editing the pose, follow the standard object modification steps, with the following additional guidelines:
+     - Original parts may be represented by basic polygons like rectangles, but bending parts is crucial for pose editing. If the parts need to be bent/deformed, replace the original polygons with `path` or `polyline` to enable easier bending of the parts. Do not modify the color of the original parts. If there is only translation or rotation, this replacement is not required.
+     - If you replace a `polygon` with a `path` or `polyline` in **Pose Editing**:
+        - You must specify the `stroke-width` to ensure the path's width matches the original polygon's width.
+        - Apply `stroke-linecap="butt"`, `stroke-linejoin="round"` to make the path's ends appear square at the start and end of the path, while the middle of the path should be smooth.
+        - If the original part is a rectangle with a starting point `(x1, y1)`, and the path's new starting point remains `(x1, y1)`, there is something wrong. Because the `(x1, y1)` for the rectangle is the top left corner, but the large stroke-width will cause the path to extend beyond the original part. You should slightly adjust the starting point to ensure it blends naturally with the surrounding elements.
+     - You are not allowed to add new paths or delete existing paths.
+     - You can either directly generate the new SVG code of the parts, or use the `transform` attribute to adjust them, preserving the original shape as much as possible.
+
+  Guidelines for expanding the prompt:
+  - When add details to describe objects, the description can be detailed and vivid, but the language should be clear and concise. Avoid overly complex or ambiguous descriptions.
+  - When breaking down objects into individual components, ensure you list all essential parts typically comprising that object, even if they are not explicitly mentioned in the initial object description.
+  - For object modifications, provide exact specifications (e.g., "Increase the unicorn's horn length by 20 units").
+  - Consider the overall composition and balance of the scene when adding or modifying elements.
+  - For connected parts, (e.g., the hand and the arm, and the leg and the body, etc.) you need to maintain the connection between the parts after editing.
+
+  Operation Summary: In the original SVG code, each shape has an `id` attribute. After generating the edited SVG code, summarize the operations performed in the following format:
+  - Element Modification: [id1, id2, ...] (for elements that were modified but kept the same stacking order)
+  - Element Removal: [id1, id2, ...] (for elements that were removed)
+  - Element Addition: start_path_id, [id1, id2, ...] (for newly added elements; `start_path_id` is the `id` of the path in the original SVG code, indicating that new elements should be inserted after the element with id `start_path_id`. If inserting at the beginning, set `start_path_id` to an empty string `""`. If there is no path addition, set `start_path_id` to `N/A`.)
+  Note: The ids in the lists refer to the ids from the original SVG code, not the edited SVG code.
+  
+  # An object addition example:
+    - The Provided Text Prompt: "Add a carrot around the mouth of the unicorn."
+
+    - Analyzed Prompt:
+      ###
+      New Object Detail:
+      # Object 1 (Carrot): The carrot is orange with two green leaves at the top.
+
+      Component Breakdown:
+      # Object 1 (Carrot): elongated orange triangle body (triangle), two small green triangular leaves (triangle)
+
+      Global Layout:
+      # Object 1 (Carrot): The carrot is near the unicorn's mouth. The unicorn's mouth is a small curved line positioned at (342, 178). Place the carrot's body slightly angled, with its base to the right of the mouth and its tip just touching the mouth. Ensure the carrot's size is proportionate to the unicorn's head.
+
+      Local Components Layout:
+      # Object 1: Carrot
+      1. Body: An elongated triangle with points at (369, 180), (348, 200), and (356, 172). The carrot body is orange (#FFA500).
+      2. Leaves: Two small triangles positioned at the top of the carrot body, centered around (363, 174). The leaves are green (#00FF00).
+
+      Stacking Order:
+      # Object 1 (Carrot): The carrot is near the unicorn's mouth. No overlapping is needed.
+      ###
+  
+
+  Refer to the Unicorn Example for response guidance and formatting. Avoiding any unnecessary dialogue in your response.
+
+  Here is the original SVG code before editing:
+  ```svg
+    <SVG_CODE>
+  ```
+
+  Here is the editing text prompt: "<TEXT_PROMPT>"
+
+  In your answer, first provide the expanded prompt, then write the SVG code in the following format:
+  ```svg
+    svg_code
+  ```
+
+write_svg_code: |
+  **Task 2**
+  Write the SVG code following the expanded prompt and layout of key components, adhering to these rules:
+  1. SVG Elements: Use only the specified elements: `rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`, and short `path` (up to 5 commands). Other elements like `text`, `Gradient`, `clipPath`, etc., are not allowed. If there is `path`, the final command should be `Z`.
+  2. Viewbox: The viewbox should be `512` by `512`.
+  3. Stacking Order: Elements defined later will overlap earlier ones. So if there is a background, it should be defined first.
+  4. Colors: Use hexadecimal color values (e.g., #FF0000). For layers fully enclosed by others, differentiate with distinct colors.
+  5. Comments: Include concise phrase to explain the semantic meaning of each element.
+  6. Minimal Adjustments: Try not to adjust the elements that are not mentioned in the expanded prompt. However, in some cases, you may need to adjust the elements to make the layout more natural and realistic.
+
+
+  A translation from the expanded prompt to SVG code is provided below.
+  ###
+  - Analyzed Prompt:
+    Global Layout:
+      # Object 1 (Carrot): Add the carrot near the unicorn's mouth. The unicorn's mouth is a small curved line positioned at (342, 178). Place the carrot's body slightly angled, with its base to the right of the mouth and its tip just touching the mouth. Ensure the carrot's size is proportionate to the unicorn's head.
+
+    Local Components Layout:
+      # Object 1: Carrot
+      1. Body: An elongated triangle with points at (369, 180), (348, 200), and (356, 172). The carrot body is orange (#FFA500).
+      2. Leaves: Two small triangles positioned at the top of the carrot body, centered around (363, 174). The leaves are green (#00FF00).
+    
+    Stacking Order:
+      # Object 1 (Carrot): The carrot is near the unicorn's mouth. No overlapping is needed.
+
+  - Translated SVG code:
+    ```svg
+    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <!-- Unicorn SVG code that already exists -->
+      <!-- Body -->
+      <ellipse id="path_1" cx="256" cy="256" rx="90" ry="60" fill="#ffc0cb"/>
+      <!-- Legs -->
+      <rect id="path_2" x="185" y="296" width="10" height="80" fill="#d3d3d3"/>
+      <rect id="path_3" x="220" y="311" width="10" height="80" fill="#d3d3d3"/>
+      <rect id="path_4" x="293" y="307" width="10" height="80" fill="#d3d3d3"/>
+      <rect id="path_5" x="316" y="296" width="10" height="80" fill="#d3d3d3"/>
+      <!-- Neck -->
+      <rect id="path_6" x="312" y="168" width="10" height="50" fill="#ffc0cb"/>
+      <!-- Head -->
+      <ellipse id="path_7" cx="342" cy="166" rx="30" ry="25" fill="#ffc0cb"/>
+      <!-- Eye -->
+      <circle id="path_8" cx="352" cy="164" r="5" fill="#000000"/>
+      <!-- Tail -->
+      <polyline id="path_9" points="168,258 122,298 142,252" fill="none" stroke="#a52a2a" stroke-width="8"/>
+      <!-- Horn -->
+      <polygon id="path_10" points="331,140 336,110 341,140" fill="#ffff00"/>
+      <!-- Unicorn mouth -->
+      <path id="path_11" d="M 337 178 Q 342 183 347 178" fill="none" stroke="#000000" stroke-width="2"/>
+
+      <!-- Add Carrot near the unicorn's mouth -->
+      <!-- Carrot body -->
+      <polygon id="path_12" points="369 180 348 200 356 172 369 180" fill="#ffa500"/>
+      <!-- Carrot leaves -->
+      <polygon id="path_13" points="363 174 364 163 373 168 363 174" fill="#00ff00"/>
+      <polygon id="path_14" points="363 174 356 166 375 173 363 174" fill="#00ff00"/>
+    </svg>
+    ```
+  
+  - Operation Summary:
+    ```summary
+    1. Path Modification: []
+    2. Path Addition: [path_12, path_13, path_14]
+    3. Path Removal: []
+    ```
+  ###
+  In your answer, avoid any unnecessary dialogue, and include the SVG code in the following format:
+  ```svg
+    svg_code
+  ```
+
+svg_refine: |
+  **Task 3**
+  The SVG code you provide, **especially the edited parts**, might have a critical issue: while it adheres to the text prompt, the rendered image could reveal real-world inconsistencies or visual oddities. For example:
+  1. Misalignments: The unicorn's legs may appear detached from the body.
+  2. Hidden elements: The snowman's arms could be hidden if they blend with the body due to identical colors and overlapping elements, making them indistinguishable.
+  3. Unrecognizable object: The SVG code includes a tiger, but the rendered image is unrecognizable due to a disorganized arrangement of shapes.
+  4. Disproportionate scaling: The squirrel's tail might appear overly small compared to its body.
+  5. Color: If a shape is purely white and placed on a white background, it may seem invisible in the final image.
+  6. Inappropriate placement: The new object is placed in an inappropriate location.
+  7. Inappropriate layer order: The house is on the ground, but the newly added grass overlaps the house.
+  
+  These issues may not be evident in the SVG code but become apparent in the rendered image.
+  
+  The provided image is rendered from your SVG code. You need to do the following:
+  1. First, carefully examine the image and SVG code to detect visual problems. If the image is severely flawed/unrecognizable, consider rewriting the entire SVG code.
+  2. Second, adjust the SVG code to correct these visual oddities, ensuring the final image appears more realistic and matches the expanded prompt.
+
+  In your answer, include the SVG code in the following format:
+  ```svg
+    svg_code
+  ```
