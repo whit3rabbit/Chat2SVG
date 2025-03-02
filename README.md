@@ -77,10 +77,10 @@ cd 1_template_generation
 bash run.sh
 ```
 - The detailed prompts of each target object can be found in `utils/util.py → get_prompt()`.
-- Output files will be saved in `output/example_generation/`, `stage_1` folder.
+- Output files will be saved in `output/example_generation/stage_1` folder.
 - To visualize/edit the SVG results, we recommend using the [SVG](https://marketplace.visualstudio.com/items?itemName=jock.svg) and [SVG Editor](https://marketplace.visualstudio.com/items?itemName=henoc.svgeditor) plugins of VSCode.
-- Since multiple SVG templates are generated, we need to select the best one for the next stage. We use [ImageReward](https://github.com/THUDM/ImageReward) or [CLIP](https://github.com/openai/CLIP) to select the best SVG template. You can also manually select the best SVG template based on your own preference.
-- Finally, there should be a `target_name.svg` (e.g., `apple.svg`) file in the root directory.
+- Since multiple SVG templates are generated, we use [ImageReward](https://github.com/THUDM/ImageReward) or [CLIP](https://github.com/openai/CLIP) to select the best one for the next stage. You can also manually select the best SVG template based on your own preference.
+- Finally, there should be a `target_template.svg` (e.g., `apple_template.svg`) file in the root directory.
 
 > [!TIP]
 > Our visual rectification process can solve common issues in SVG. However, we've observed that in some cases, VLM may actually degrade the quality of the SVG during rectification. We recommend double-checking the output before and after rectification to ensure the best results.
@@ -94,17 +94,15 @@ bash run.sh              # detail enhancement
 ```
 
 The above command will:
-- clean SVG templates using picosvg (convert shapes to cubic Bézier curves),
-- generate target images using [SDXL](https://civitai.com/models/269232/aam-xl-anime-mix) and [ControlNet](https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0),
-- use [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything) to add new shapes.
-- Output files: `apple_clean.svg`, `apple_target.png`, `apple_with_new_shape.svg`
+- clean SVG templates using picosvg (convert shapes to cubic Bézier curves), output `apple_clean.svg`
+- generate target images using [SDXL](https://civitai.com/models/269232/aam-xl-anime-mix) and [ControlNet](https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0), output `apple_image.png`
+- use [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything) to add new shapes, output `apple_with_new_shape.svg`
 
 > [!TIP]
-> 1. Adjust the `strength` to control the strength of the detail enhancement. We recommend `0.75` for mild enhancement and `1.0` for strong enhancement.
-> 2. The default number of generated target images is 4, and we select the **first one** as the default target image. You can check all generated images to select your preferred one.
-> 3. Adjust `points_per_side` in SAM to control the granularity of the added shapes.
-> 4. Adjust `thresh_iou` in SAM to control the threshold that determines whether a shape is a new shape or not.
-> 5. As mentioned in the paper's limitation section, SAM sometimes may not add appropriate shapes. Please check the output and modify if necessary.
+> 1. Adjust the `strength` to control the strength of the SDEdit (Image to Image). We recommend `0.75` for mild enhancement and `1.0` for strong enhancement.
+> 2. The default number of generated target images is `4`, and we select the **first one** as the default target image. You can check all generated images to select your preferred one.
+> 3. Adjust `points_per_side` in SAM to control the granularity of the added shapes, and adjust `thresh_iou` to control the threshold that determines whether a shape is a new shape or not.
+> 4. As mentioned in the paper's limitation section, SAM sometimes may not add appropriate shapes. Please check the output and modify if necessary.
 
 
 ### Stage 3: SVG Shape Optimization
@@ -116,8 +114,8 @@ bash run.sh              # optimize SVG shapes (GPU consumption: less than 4GB)
 
 > [!TIP]
 > 1. We turn off `enable_path_iou_loss` by default, which can greatly improve time efficiency. To avoid path semantic meaning shifts, you can set it to `True`.
-> 2. We appropriately scale up the loss weights (different from the paper) to ensure faster convergence.
-> 3. Results: `apple_optim_point.svg`
+> 2. We proportionally scale up the loss weights (different from the paper) to ensure faster convergence.
+> 3. Results: `apple_optim_latent.svg` and `apple_optim_point.svg`
 
 ## Automated Pipeline (For Comparison ⚖️)
 Code coming soon. Alternatively, you can enter each folder and run the `run.sh` script to generate all outputs.
