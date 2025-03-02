@@ -64,6 +64,8 @@ cd ..
 
 ## Step-By-Step Pipeline (For High-Quality SVG 🎨)
 
+> We have provided some sample generation and intermediate results in the `output/example_generation` folder. You can check them to get a better understanding of the pipeline.
+
 ### Stage 1: Template Generation
 
 First, paste your Anthropic API key into the `.env` file:
@@ -95,7 +97,7 @@ bash run.sh              # detail enhancement
 
 The above command will:
 - clean SVG templates using picosvg (convert shapes to cubic Bézier curves), output `apple_clean.svg`
-- generate target images using [SDXL](https://civitai.com/models/269232/aam-xl-anime-mix) and [ControlNet](https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0), output `apple_image.png`
+- generate target images using [SDXL](https://civitai.com/models/269232/aam-xl-anime-mix) and [ControlNet](https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0), output `apple_target.png`
 - use [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything) to add new shapes, output `apple_with_new_shape.svg`
 
 > [!TIP]
