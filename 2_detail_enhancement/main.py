@@ -280,19 +280,24 @@ def clean_data(cfg, svg_template_path, svg_cleaned_path):
 
 
 def load_model(model_id, controlnet_id=None, clip_skip=2):
+    if torch.backends.mps.is_available():
+        # app silicon use mps
+        device = torch.device("mps")
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     controlnet = ControlNetModel.from_pretrained(
         controlnet_id, torch_dtype=torch.float16, use_safetensors=True
-    )
+    ).to(device)
     pipe = StableDiffusionXLControlNetImg2ImgPipeline.from_single_file(
         model_id, controlnet=controlnet, torch_dtype=torch.float16
-    )
+    ).to(device)
     pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
 
     clip_layers = pipe.text_encoder.text_model.encoder.layers
     if clip_skip > 0:
         pipe.text_encoder.text_model.encoder.layers = clip_layers[:-clip_skip]
-    
-    pipe.enable_model_cpu_offload()
+    if not torch.backends.mps.is_available():
+        pipe.enable_model_cpu_offload()
     return pipe
 
 

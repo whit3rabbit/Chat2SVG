@@ -509,7 +509,7 @@ if __name__ == "__main__":
     # load VAE
     model_config = load_model_config(config)
     model = SVGTransformer(model_config).to(device)
-    state = torch.load(config.vae_pretrained_path)
+    state = torch.load(config.vae_pretrained_path, map_location=device)
     model.load_state_dict(state, strict=False)
     model.eval()
 
