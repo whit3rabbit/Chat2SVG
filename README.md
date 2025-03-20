@@ -129,6 +129,8 @@ bash run.sh              # optimize SVG shapes (GPU consumption: less than 4GB)
 cd web/backend
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
+
+cd web
 npm install
 npm start
 ```
