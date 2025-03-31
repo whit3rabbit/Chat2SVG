@@ -135,7 +135,8 @@ npm install
 npm start
 ```
 
-
+Running effect:
+![title](./assets/web_demo.png)
 
 ## Automated Pipeline (For Comparison ⚖️)
 Code coming soon. Alternatively, you can enter each folder and run the `run.sh` script to generate all outputs.
