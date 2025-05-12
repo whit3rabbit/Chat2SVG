@@ -7,6 +7,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 
 import openai
 import anthropic
+# Using local OpenRouter implementation
 from openrouter import OpenRouter
 
 from models import LLMProvider, ProviderSettings, AppSettings
@@ -19,27 +20,45 @@ class LLMService:
         self.settings = settings
         self.clients = {}
         
+        # OpenRouter site info - could be loaded from environment variables or config
+        site_url = os.environ.get("SITE_URL", "https://chat2svg.ai")
+        site_title = os.environ.get("SITE_TITLE", "Chat2SVG")
+        
         # Initialize clients for each provider
         for provider_type, provider_settings in settings.providers.items():
             if provider_type == LLMProvider.OPENAI:
+                base_url = None
+                if provider_settings.api_base and provider_settings.api_base.strip():
+                    base_url = provider_settings.api_base.strip()
+                
                 self.clients[provider_type] = openai.OpenAI(
                     api_key=provider_settings.api_key,
-                    base_url=provider_settings.api_base
+                    base_url=base_url
                 )
             elif provider_type == LLMProvider.ANTHROPIC:
                 self.clients[provider_type] = anthropic.Anthropic(
                     api_key=provider_settings.api_key
                 )
             elif provider_type == LLMProvider.OPENROUTER:
+                base_url = "https://openrouter.ai/api/v1"
+                if provider_settings.api_base and provider_settings.api_base.strip():
+                    base_url = provider_settings.api_base.strip()
+                
                 self.clients[provider_type] = OpenRouter(
                     api_key=provider_settings.api_key,
-                    base_url=provider_settings.api_base
+                    base_url=base_url,
+                    site_url=site_url,
+                    site_title=site_title
                 )
             elif provider_type == LLMProvider.LOCAL:
                 # For local, we'll use the OpenAI client with a custom base URL
+                base_url = None
+                if provider_settings.api_base and provider_settings.api_base.strip():
+                    base_url = provider_settings.api_base.strip()
+                
                 self.clients[provider_type] = openai.OpenAI(
                     api_key=provider_settings.api_key or "sk-no-key-required",
-                    base_url=provider_settings.api_base
+                    base_url=base_url
                 )
     
     @retry(

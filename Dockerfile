@@ -123,8 +123,9 @@ WORKDIR /app
 
 # Copy installed Python packages from python-builder stage
 # We're now using the correct paths based on the sys.path output
-COPY --from=python-builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/dist-packages/
+COPY --from=python-builder /usr/local/lib/python3.10/dist-packages/ /usr/local/lib/python3.10/dist-packages/
 COPY --from=python-builder /usr/lib/python3/dist-packages/ /usr/lib/python3/dist-packages/
+# Removed the /root/.local path because it doesn't exist in the builder stage
 COPY --from=python-builder /usr/local/bin/ /usr/local/bin/
 
 # Copy frontend node_modules (and build artifacts if any) from frontend-builder stage

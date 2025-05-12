@@ -19,6 +19,12 @@ import {
   FormControl,
   Alert,
   Snackbar,
+  useTheme,
+  alpha,
+  Paper,
+  Divider,
+  Fade,
+  Zoom
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -34,6 +40,7 @@ interface ModelsByProvider {
 
 const TabPanel = (props: TabPanelProps) => {
   const { children, value, index, ...other } = props;
+  const theme = useTheme();
 
   return (
     <div
@@ -44,7 +51,11 @@ const TabPanel = (props: TabPanelProps) => {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ 
+          p: 3,
+          height: '100%',
+          overflowY: 'auto'
+        }}>
           {children}
         </Box>
       )}
@@ -103,6 +114,8 @@ export default function SettingsDialog({ open, onClose, onSettingsChange }: Sett
     message: '',
     severity: 'info',
   });
+  
+  const theme = useTheme();
 
   useEffect(() => {
     if (open) {
@@ -249,10 +262,36 @@ export default function SettingsDialog({ open, onClose, onSettingsChange }: Sett
     }
   };
 
+  const getProviderDescription = (provider: string): string => {
+    switch (provider) {
+      case 'openai':
+        return 'Configure OpenAI API access for models like GPT-4o and GPT-3.5';
+      case 'anthropic':
+        return 'Connect to Anthropic\'s Claude models for high-quality responses';
+      case 'openrouter':
+        return 'Access multiple models from different providers through a single API';
+      case 'local':
+        return 'Connect to locally-hosted LLMs with OpenAI-compatible APIs';
+      default:
+        return '';
+    }
+  };
+
   if (loading && !settings) {
     return (
-      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-        <DialogTitle>
+      <Dialog 
+        open={open} 
+        onClose={onClose} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            bgcolor: theme.palette.background.paper,
+          }
+        }}
+      >
+        <DialogTitle sx={{ px: 3, py: 2.5 }}>
           Settings
           <IconButton
             aria-label="close"
@@ -290,25 +329,75 @@ export default function SettingsDialog({ open, onClose, onSettingsChange }: Sett
   });
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        Settings
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      TransitionComponent={Fade}
+      transitionDuration={{
+        enter: 400,
+        exit: 300,
+      }}
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          bgcolor: theme.palette.background.paper,
+          backgroundImage: 'none',
+          overflow: 'hidden',
+        }
+      }}
+    >
+      <DialogTitle sx={{ px: 3, py: 2.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+        <Typography variant="h6" fontWeight={600}>
+          Settings
+        </Typography>
         <IconButton
           aria-label="close"
           onClick={onClose}
-          sx={{ position: 'absolute', right: 8, top: 8 }}
+          sx={{ position: 'absolute', right: 16, top: 16 }}
         >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
+      <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '550px' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.6) : alpha(theme.palette.background.default, 0.8),
+        }}>
+          <Tabs 
+            value={tabValue} 
+            onChange={handleTabChange} 
+            aria-label="settings tabs"
+            sx={{
+              '.MuiTabs-indicator': {
+                backgroundColor: theme.palette.primary.main,
+                height: 3,
+              },
+              '.MuiTab-root': {
+                textTransform: 'none',
+                minWidth: 0,
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                px: 3,
+                pt: 2,
+                '&.Mui-selected': {
+                  color: theme.palette.primary.main,
+                }
+              }
+            }}
+          >
             {providerNames.map((provider, index) => (
               <Tab 
                 key={provider} 
                 label={getProviderTitle(provider)} 
                 {...a11yProps(index)} 
+                sx={{
+                  borderBottom: settings?.providers[provider] && settings.default_provider === provider 
+                    ? `3px solid ${theme.palette.primary.main}` 
+                    : 'none'
+                }}
               />
             ))}
           </Tabs>
@@ -316,24 +405,41 @@ export default function SettingsDialog({ open, onClose, onSettingsChange }: Sett
         
         {providerNames.map((provider, index) => (
           <TabPanel key={provider} value={tabValue} index={index}>
-            <Typography variant="h6" gutterBottom>
-              {getProviderTitle(provider)} Settings
-              {settings?.providers[provider] && settings.default_provider === provider && (
-                <Typography 
-                  component="span" 
-                  sx={{ 
-                    ml: 2, 
-                    fontSize: '0.8rem', 
-                    bgcolor: 'primary.main', 
-                    color: 'white',
-                    p: 0.5,
-                    borderRadius: 1
-                  }}
-                >
-                  Default
-                </Typography>
-              )}
-            </Typography>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                mb: 3, 
+                borderRadius: 2,
+                backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.4) : alpha(theme.palette.background.default, 0.5),
+                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+              }}
+            >
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                {getProviderTitle(provider)}
+                {settings?.providers[provider] && settings.default_provider === provider && (
+                  <Typography 
+                    component="span" 
+                    sx={{ 
+                      ml: 2, 
+                      fontSize: '0.75rem', 
+                      bgcolor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
+                      p: '3px 8px',
+                      borderRadius: 1,
+                      fontWeight: 500,
+                      verticalAlign: 'middle'
+                    }}
+                  >
+                    Default
+                  </Typography>
+                )}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {getProviderDescription(provider)}
+              </Typography>
+              <Divider sx={{ my: 2 }} />
+            </Paper>
             
             <Box component="form" sx={{ mt: 2 }}>
               <TextField
@@ -351,6 +457,11 @@ export default function SettingsDialog({ open, onClose, onSettingsChange }: Sett
                   provider === 'openrouter' ? 'Enter your OpenRouter API key' :
                   provider === 'local' ? 'API key for your local LLM (may not be required)' : ''
                 }
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1.5,
+                  }
+                }}
               />
               
               {(provider === 'openai' || provider === 'local' || provider === 'openrouter') && (
@@ -371,10 +482,23 @@ export default function SettingsDialog({ open, onClose, onSettingsChange }: Sett
                     provider === 'openrouter' ? 'Optional: custom OpenRouter endpoint' :
                     provider === 'local' ? 'URL for your local LLM server with OpenAI-compatible API' : ''
                   }
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 1.5,
+                    }
+                  }}
                 />
               )}
               
-              <FormControl fullWidth margin="normal">
+              <FormControl 
+                fullWidth 
+                margin="normal"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1.5,
+                  }
+                }}
+              >
                 <InputLabel id={`${provider}-model-label`}>Model</InputLabel>
                 <Select
                   labelId={`${provider}-model-label`}
@@ -396,14 +520,26 @@ export default function SettingsDialog({ open, onClose, onSettingsChange }: Sett
                   />
                 }
                 label="Set as default provider"
+                sx={{ mt: 1 }}
               />
               
-              <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+              <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
                 <Button 
                   variant="contained" 
                   onClick={() => handleSubmit(provider)}
                   disabled={loading}
                   startIcon={loading ? <CircularProgress size={20} /> : null}
+                  sx={{ 
+                    px: 3,
+                    py: 1,
+                    background: 'linear-gradient(90deg, #7c3aed, #0ea5e9)',
+                    '&:hover': {
+                      background: 'linear-gradient(90deg, #6d28d9, #0284c7)'
+                    },
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    boxShadow: 'none'
+                  }}
                 >
                   Save Settings
                 </Button>
@@ -413,22 +549,51 @@ export default function SettingsDialog({ open, onClose, onSettingsChange }: Sett
                   onClick={() => testConnection(provider)}
                   disabled={testingConnection || !settings?.providers[provider]?.has_api_key}
                   startIcon={testingConnection ? <CircularProgress size={20} /> : null}
+                  sx={{ 
+                    px: 3,
+                    textTransform: 'none',
+                    fontWeight: 500
+                  }}
                 >
                   Test Connection
                 </Button>
               </Box>
               
               {provider === 'local' && (
-                <Alert severity="info" sx={{ mt: 2 }}>
+                <Alert 
+                  severity="info" 
+                  sx={{ 
+                    mt: 3,
+                    borderRadius: 1.5,
+                    backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.1) : alpha(theme.palette.info.light, 0.1),
+                    border: '1px solid',
+                    borderColor: theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.2) : alpha(theme.palette.info.light, 0.3),
+                    '& .MuiAlert-icon': {
+                      color: theme.palette.info.main
+                    }
+                  }}
+                >
                   For local LLMs, make sure your local server implements the OpenAI-compatible API interface.
                   Examples include LM Studio, Ollama, and vLLM.
                 </Alert>
               )}
               
               {provider === 'openrouter' && (
-                <Alert severity="info" sx={{ mt: 2 }}>
+                <Alert 
+                  severity="info" 
+                  sx={{ 
+                    mt: 3,
+                    borderRadius: 1.5,
+                    backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.1) : alpha(theme.palette.info.light, 0.1),
+                    border: '1px solid',
+                    borderColor: theme.palette.mode === 'dark' ? alpha(theme.palette.info.main, 0.2) : alpha(theme.palette.info.light, 0.3),
+                    '& .MuiAlert-icon': {
+                      color: theme.palette.info.main
+                    }
+                  }}
+                >
                   OpenRouter provides access to multiple LLM providers through a single API.
-                  Get your API key at <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer">openrouter.ai</a>
+                  Get your API key at <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" style={{color: theme.palette.primary.main}}>openrouter.ai</a>
                 </Alert>
               )}
             </Box>
@@ -441,12 +606,13 @@ export default function SettingsDialog({ open, onClose, onSettingsChange }: Sett
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        TransitionComponent={Zoom}
       >
         <Alert 
           onClose={handleCloseSnackbar} 
           severity={snackbar.severity}
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: '100%', borderRadius: 1.5 }}
         >
           {snackbar.message}
         </Alert>

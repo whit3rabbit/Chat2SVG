@@ -1,100 +1,122 @@
-import {useState} from 'react';
-import {Box, Button, TextField, Alert} from '@mui/material';
+import React, {useRef, useEffect, useState} from 'react';
+import { Box, useTheme, Button, alpha } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DownloadIcon from '@mui/icons-material/Download';
 
 interface SvgEditorProps {
     content: string;
 }
 
-const sanitizeSVG = (svg: string) => {
-    return svg
-        .replace(/<script.*?>.*?<\/script>/gi, '')
-        .replace(/on\w+=".*?"/g, '');
-};
-
 export default function SvgEditor({content}: SvgEditorProps) {
-    const [previewMode, setPreviewMode] = useState(true);
-
-    const handleDownload = () => {
-        const sanitized = sanitizeSVG(content);
-        const blob = new Blob([sanitized], {type: 'image/svg+xml'});
+    const theme = useTheme();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isHovering, setIsHovering] = useState(false);
+    
+    // For clipboard and download actions
+    const handleCopyToClipboard = () => {
+        navigator.clipboard.writeText(content).catch(err => {
+            console.error('Failed to copy SVG to clipboard:', err);
+        });
+    };
+    
+    const handleDownloadSvg = () => {
+        const blob = new Blob([content], { type: 'image/svg+xml' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `design-${Date.now()}.svg`;
+        a.download = `chat2svg-${Date.now()}.svg`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     };
+    
+    useEffect(() => {
+        if (containerRef.current) {
+            containerRef.current.innerHTML = content;
+        }
+    }, [content]);
 
     return (
-        <Box sx={{
-            border: '1px solid #ddd',
-            borderRadius: 1,
-            flexShrink: 0,
-            width: '100%',
-            maxWidth: 600,
-            mb: 2
-        }}>
-            <Box sx={{
-                p: 2,
-                bgcolor: '#f5f5f5',
+        <Box 
+            sx={{ 
+                height: '100%',
+                position: 'relative',
+                bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.4) : '#fff',
+                borderRadius: 0,
+                overflow: 'hidden',
                 display: 'flex',
-                gap: 1,
-                alignItems: 'center'
-            }}>
-                <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => setPreviewMode(true)}
-                    disabled={previewMode}
-                >
-                    Preview
-                </Button>
-                <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => setPreviewMode(false)}
-                    disabled={!previewMode}
-                >
-                    Code
-                </Button>
-                <Button
-                    variant="contained"
-                    size="small"
-                    onClick={handleDownload}
-                    sx={{marginLeft: 'auto'}}
-                >
-                    Download
-                </Button>
-            </Box>
-
-            <Box sx={{p: 2}}>
-                {previewMode ? (
-                    <Box sx={{
-                        border: '1px solid #eee',
-                        padding: 2,
-                        '& svg': {
-                            maxWidth: '100%',
-                            height: 'auto'
-                        }
-                    }}>
-                        <div dangerouslySetInnerHTML={{__html: sanitizeSVG(content)}}/>
-                    </Box>
-                ) : (
-                    <TextField
-                        fullWidth
-                        multiline
-                        minRows={10}
-                        maxRows={20}
-                        value={content}
-                        InputProps={{
-                            readOnly: true,
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: 2,
+            }}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+        >
+            <div 
+                ref={containerRef} 
+                style={{ 
+                    maxWidth: '100%', 
+                    maxHeight: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+            />
+            
+            {isHovering && (
+                <Box sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    display: 'flex',
+                    gap: 1,
+                    zIndex: 10,
+                }}>
+                    <Button
+                        variant="contained"
+                        size="small"
+                        startIcon={<ContentCopyIcon fontSize="small" />}
+                        onClick={handleCopyToClipboard}
+                        sx={{
+                            bgcolor: alpha(theme.palette.background.paper, 0.7),
+                            color: theme.palette.text.primary,
+                            backdropFilter: 'blur(4px)',
+                            textTransform: 'none',
+                            fontWeight: 500,
+                            fontSize: '0.75rem',
+                            boxShadow: 'none',
+                            '&:hover': {
+                                bgcolor: alpha(theme.palette.background.paper, 0.9),
+                                boxShadow: 'none',
+                            }
                         }}
-                        variant="outlined"
-                    />
-                )}
-            </Box>
+                    >
+                        Copy
+                    </Button>
+                    <Button
+                        variant="contained"
+                        size="small"
+                        startIcon={<DownloadIcon fontSize="small" />}
+                        onClick={handleDownloadSvg}
+                        sx={{
+                            bgcolor: alpha(theme.palette.background.paper, 0.7),
+                            color: theme.palette.text.primary,
+                            backdropFilter: 'blur(4px)',
+                            textTransform: 'none',
+                            fontWeight: 500,
+                            fontSize: '0.75rem',
+                            boxShadow: 'none',
+                            '&:hover': {
+                                bgcolor: alpha(theme.palette.background.paper, 0.9),
+                                boxShadow: 'none',
+                            }
+                        }}
+                    >
+                        Download
+                    </Button>
+                </Box>
+            )}
         </Box>
     );
 }
