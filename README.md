@@ -15,9 +15,30 @@ Chat2SVG is a framework for generating vector graphics using large language mode
 - [x] Detail enhancement with image diffusion models
 - [x] SVG shape optimization
 
+## Docker setup
+
+Build this continaer:
+
+```bash
+docker build -t chat2svg-web:latest .
+```
+
+Run container:
+
+```bash
+docker run -it --rm \
+    --gpus all \
+    -p 3000:3000 \
+    -p 8000:8000 \
+    -v $(pwd)/.env:/app/.env \
+    -v $(pwd)/output:/app/output \
+    chat2svg-web:latest
+```
+
 
 ## Setup
 Clone the repository:
+
 ```shell
 git clone git@github.com:kingnobro/Chat2SVG.git
 cd Chat2SVG
@@ -26,6 +47,7 @@ conda activate chat2svg
 ```
 
 Install PyTorch and other dependencies:
+
 ```shell
 conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1  pytorch-cuda=11.8 -c pytorch -c nvidia
 pip install git+https://github.com/facebookresearch/segment-anything.git
@@ -33,6 +55,7 @@ pip install -r requirements.txt
 ```
 
 Install [diffvg](https://github.com/BachiLi/diffvg) for differentiable rendering:
+
 ```shell
 git clone https://github.com/BachiLi/diffvg.git
 cd diffvg
@@ -69,11 +92,13 @@ cd ..
 ### Stage 1: Template Generation
 
 First, paste your Anthropic API key into the `.env` file:
+
 ```shell
 OPENAI_API_KEY=<your_key>
 ```
 
 Then, run the following command to generate SVG templates:
+
 ```shell
 cd 1_template_generation
 bash run.sh
