@@ -1,7 +1,9 @@
 import React, {useState, useRef, useEffect} from 'react';
-import {Box, TextField, Button, CircularProgress, Alert, Typography} from '@mui/material';
+import {Box, TextField, Button, CircularProgress, Alert, Typography, IconButton} from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
 import ProgressStepper from './components/ProgressStepper';
 import SvgEditor from './components/SvgEditor';
+import SettingsDialog from './components/SettingsDialog';
 import {WebSocketMessage} from './type/type';
 
 export default function App() {
@@ -13,6 +15,8 @@ export default function App() {
     const [error, setError] = useState('');
     const [currentStage, setCurrentStage] = useState(0);
     const [failedStage, setFailedStage] = useState<number | null>(null);
+    const [provider, setProvider] = useState<string | null>(null);
+    const [settingsOpen, setSettingsOpen] = useState(false);
     const ws = useRef<WebSocket | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -23,6 +27,23 @@ export default function App() {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+    
+    useEffect(() => {
+        // Fetch the default provider on initial load
+        const fetchSettings = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/api/settings');
+                if (response.ok) {
+                    const data = await response.json();
+                    setProvider(data.default_provider);
+                }
+            } catch (error) {
+                console.error('Failed to fetch settings:', error);
+            }
+        };
+        
+        fetchSettings();
+    }, []);
 
     const startGeneration = (retryStage?: number) => {
         setError('');
@@ -41,10 +62,17 @@ export default function App() {
         const websocket = new WebSocket('ws://localhost:8000/ws/generate');
 
         websocket.onopen = () => {
-            websocket.send(JSON.stringify({
+            const params: any = {
                 prompt,
                 startFrom: retryStage || 1
-            }));
+            };
+            
+            // Add provider if selected
+            if (provider) {
+                params.provider = provider;
+            }
+            
+            websocket.send(JSON.stringify(params));
         };
 
         websocket.onmessage = async (event) => {
@@ -106,6 +134,18 @@ export default function App() {
         }
         startGeneration(stage);
     };
+    
+    const handleSettingsOpen = () => {
+        setSettingsOpen(true);
+    };
+    
+    const handleSettingsClose = () => {
+        setSettingsOpen(false);
+    };
+    
+    const handleProviderChange = (newProvider: string) => {
+        setProvider(newProvider);
+    };
 
 
     useEffect(() => {
@@ -126,6 +166,21 @@ export default function App() {
 
         return `[${timestamp}] ${stageInfo}${msg.output}`;
     };
+    
+    const getMessageColor = (status?: string): string => {
+        switch (status) {
+            case 'error':
+                return 'rgba(255, 0, 0, 0.1)';
+            case 'completed':
+                return 'rgba(0, 255, 0, 0.1)';
+            case 'svg_ready':
+            case 'svg_ready2':
+            case 'svg_ready3':
+                return 'rgba(0, 0, 255, 0.1)';
+            default:
+                return 'transparent';
+        }
+    };
 
     return (
         <Box sx={{
@@ -143,13 +198,22 @@ export default function App() {
                 mb: 2,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'space-between',
                 py: 2,
                 borderBottom: '2px solid #eee'
             }}>
                 <Typography variant="h3" component="h1" sx={{fontWeight: 700, color: 'primary.main'}}>
                     chat2svg
                 </Typography>
+                
+                <IconButton 
+                    onClick={handleSettingsOpen}
+                    color="primary"
+                    aria-label="settings"
+                    sx={{ p: 1 }}
+                >
+                    <SettingsIcon />
+                </IconButton>
             </Box>
 
             <Box sx={{
@@ -181,7 +245,7 @@ export default function App() {
                     </Button>
                 </Box>
 
-                <Box sx={{display: 'flex', gap: 2}}>
+                
                     <ProgressStepper
                         currentStage={currentStage}
                         failedStage={failedStage}
@@ -232,6 +296,7 @@ export default function App() {
                         </Box>
                         <Typography variant="caption" color="text.secondary">
                             {new Date().toLocaleDateString()}
+                            {provider && ` | Provider: ${provider}`}
                         </Typography>
                     </Box>
                     <Box sx={{
@@ -256,23 +321,12 @@ export default function App() {
                         <div ref={messagesEndRef}/>
                     </Box>
                 </Box>
-            </Box>
+            
+            <SettingsDialog 
+                open={settingsOpen} 
+                onClose={handleSettingsClose} 
+                onSettingsChange={handleProviderChange}
+            />
         </Box>
     );
 }
-
-
-const getMessageColor = (status?: string) => {
-    switch (status) {
-        case 'error':
-            return '#ff000033';
-        case 'warning':
-            return '#ffa50033';
-        case 'success':
-            return '#00800033';
-        case 'svg_ready':
-            return '#2196f333';
-        default:
-            return 'transparent';
-    }
-};

@@ -6,6 +6,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 import sys
+from typing import Dict, Any, List, Optional
+
+from models import LLMProvider, ProviderSettings, AppSettings
+from llm_service import get_llm_service
 
 app = FastAPI()
 
@@ -23,14 +27,41 @@ env = os.environ.copy()
 env["PYTHONPATH"] = str(PROJECT_ROOT)
 env["PYTHONUNBUFFERED"] = "1"
 
+# Load environment variables
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"))
-env["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+# Set up environment variables for LLM providers
+# We keep this for backward compatibility
+env["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
+# Add other providers' environment variables
+for key in os.environ:
+    if key.startswith(("OPENAI_", "ANTHROPIC_", "OPENROUTER_", "LOCAL_LLM_")):
+        env[key] = os.environ[key]
 
 
-async def run_stage(websocket: WebSocket, stage: int, prompt: str):
+async def run_stage(websocket: WebSocket, stage: int, prompt: str, provider: Optional[str] = None):
     target = prompt.replace(" ", "_")
     output_path = PROJECT_ROOT / "output"
     output_folder = "example_generation/" + target
+
+    # Get provider settings
+    llm_service = get_llm_service()
+    provider_enum = LLMProvider(provider) if provider else None
+    
+    # If provider specified but not available, return error
+    if provider_enum and provider_enum not in llm_service.settings.providers:
+        await websocket.send_json({
+            "stage": stage,
+            "status": "error",
+            "output": f"Provider {provider} not configured. Please add API key in settings."
+        })
+        return
+        
+    # If provider specified, get model from provider settings
+    model = None
+    if provider_enum:
+        provider_settings = llm_service.settings.providers[provider_enum]
+        model = provider_settings.model
 
     stage_scripts = {
         1: [
@@ -41,7 +72,7 @@ async def run_stage(websocket: WebSocket, stage: int, prompt: str):
             "--output_path", str(output_path),
             "--output_folder", output_folder,
             "--system_path", str(PROJECT_ROOT),
-            "--model", "claude-3-5-sonnet-20240620",
+            "--model", model or "claude-3-5-sonnet-20240620",
             "--prompt", prompt
         ],
         2: [
@@ -196,6 +227,7 @@ async def websocket_generator(websocket: WebSocket):
         params = json.loads(data)
         prompt = params["prompt"]
         start_from = params.get("startFrom", 1)
+        provider = params.get("provider", None)  # Optional provider parameter
         stages_to_run = [s for s in [1, 2, 3] if s >= start_from]
 
         for stage in stages_to_run:
@@ -207,7 +239,7 @@ async def websocket_generator(websocket: WebSocket):
 
             try:
                 await asyncio.wait_for(
-                    run_stage(websocket, stage, prompt),
+                    run_stage(websocket, stage, prompt, provider),
                     timeout=2400
                 )
             except asyncio.TimeoutError:
@@ -253,3 +285,150 @@ async def get_svg(file_path: str):
         "status": "ok",
         "content": svg_path.read_text(encoding='utf-8')
     }
+
+
+@app.get("/api/settings")
+async def get_settings():
+    """Get current LLM provider settings"""
+    llm_service = get_llm_service()
+    
+    # Create a safe version of settings without API keys
+    safe_settings = {
+        "default_provider": llm_service.settings.default_provider,
+        "providers": {}
+    }
+    
+    for provider, settings in llm_service.settings.providers.items():
+        safe_settings["providers"][provider] = {
+            "provider": settings.provider,
+            "model": settings.model,
+            "api_base": settings.api_base,
+            # Don't return the actual API key, just whether it's set
+            "has_api_key": bool(settings.api_key)
+        }
+    
+    return safe_settings
+
+
+@app.get("/api/models")
+async def get_available_models():
+    """Get predefined models available for each provider"""
+    # Define popular models for each provider
+    models = {
+        "openai": [
+            "gpt-4o",
+            "gpt-4-turbo",
+            "gpt-4",
+            "gpt-3.5-turbo"
+        ],
+        "anthropic": [
+            "claude-3-5-sonnet-20240620",
+            "claude-3-opus-20240229",
+            "claude-3-sonnet-20240229",
+            "claude-3-haiku-20240307"
+        ],
+        "openrouter": [
+            "openai/gpt-4o",
+            "anthropic/claude-3-5-sonnet",
+            "anthropic/claude-3-opus",
+            "mistralai/mistral-large",
+            "google/gemini-1.5-pro"
+        ],
+        "local": [
+            "default"  # Local model names depend on setup
+        ]
+    }
+    
+    return models
+
+
+@app.post("/api/settings/provider")
+async def update_provider_settings(settings: Dict[str, Any]):
+    """Update provider settings"""
+    try:
+        # Update environment with the new settings
+        if "provider" not in settings:
+            raise HTTPException(400, "Provider parameter is required")
+            
+        provider = settings["provider"]
+        
+        # Update environment variables based on provider
+        if provider == "openai":
+            prefix = "OPENAI_"
+        elif provider == "anthropic":
+            prefix = "ANTHROPIC_"
+        elif provider == "openrouter":
+            prefix = "OPENROUTER_"
+        elif provider == "local":
+            prefix = "LOCAL_LLM_"
+        else:
+            raise HTTPException(400, f"Unsupported provider: {provider}")
+            
+        # Update API key if provided
+        if "api_key" in settings and settings["api_key"]:
+            os.environ[f"{prefix}API_KEY"] = settings["api_key"]
+            env[f"{prefix}API_KEY"] = settings["api_key"]
+            
+        # Update API base if provided
+        if "api_base" in settings and settings["api_base"]:
+            os.environ[f"{prefix}API_BASE"] = settings["api_base"]
+            env[f"{prefix}API_BASE"] = settings["api_base"]
+            
+        # Update model if provided
+        if "model" in settings and settings["model"]:
+            os.environ[f"{prefix}MODEL"] = settings["model"]
+            env[f"{prefix}MODEL"] = settings["model"]
+            
+        # Set as default provider if requested
+        if "set_default" in settings and settings["set_default"]:
+            os.environ["DEFAULT_LLM_PROVIDER"] = provider
+            env["DEFAULT_LLM_PROVIDER"] = provider
+            
+        # Reinitialize LLM service with updated settings
+        global _llm_service_instance
+        from llm_service import _llm_service_instance
+        _llm_service_instance = None  # Force reinitialization
+        
+        # Get updated settings
+        llm_service = get_llm_service()
+        
+        return {
+            "status": "ok",
+            "message": f"Updated settings for {provider}",
+            "default_provider": llm_service.settings.default_provider
+        }
+    except Exception as e:
+        raise HTTPException(500, f"Failed to update settings: {str(e)}")
+
+
+@app.get("/api/test_connection/{provider}")
+async def test_provider_connection(provider: str):
+    """Test connection to a provider"""
+    try:
+        llm_service = get_llm_service()
+        
+        # Check if provider exists
+        if LLMProvider(provider) not in llm_service.settings.providers:
+            return {
+                "status": "error",
+                "message": f"Provider {provider} not configured"
+            }
+            
+        # Test simple completion
+        response = await llm_service.generate_completion(
+            provider=LLMProvider(provider),
+            prompt="Hello, please respond with just the word 'Connected' if you can see this message.",
+            max_tokens=10
+        )
+        
+        return {
+            "status": "ok",
+            "message": "Connection successful",
+            "model": response["model"],
+            "response": response["content"]
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Connection failed: {str(e)}"
+        }

@@ -3,12 +3,13 @@ import yaml
 import base64
 import mimetypes
 import requests
+import json
+from typing import Dict, Any, Optional, List
 from dotenv import load_dotenv
 from utils.util import read
 
-# Create a .env file in the project root directory and add your Anthropic API key as ANTHROPIC_API_KEY=<your_key>
+# Create a .env file in the project root directory and add your API keys
 load_dotenv(dotenv_path=os.path.join("..", ".env"))
-api_key = os.getenv("OPENAI_API_KEY")
 
 
 class Session:
@@ -53,26 +54,265 @@ class Session:
         return prompt
 
     def _send(self, prompt: str, images: list[str] = [], file_path=None) -> str:
-        payload = self._create_payload(prompt, images=images)
         if not os.path.exists(file_path):
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            }
-            print("Waiting for LLM to be generated")
-            # response = requests.post("https://api.anthropic.com/v1/messages", headers=headers, json=payload, timeout=(5, 120))  # Anthropic
-            # response = requests.post("https://aium.cc/v1/chat/completions", headers=headers, json=payload, timeout=(5, 120)) #If you are in mainland China, you can try aium.cc
-            response = requests.post("https://api.gptsapi.net/v1/chat/completions", headers=headers, json=payload,
-                                     timeout=(5, 120))  # WildCard
-            print(f"LLM response: {response.text}")
-            try:
-                response = response.json()['choices'][0]['message']['content']
-            except:
-                print(f"$ --- Error Response: {response.json()}\n")
+            # Try to get appropriate client based on model name
+            if self.model.startswith("claude"):
+                response = self._send_anthropic(prompt, images)
+            elif self.model.startswith("gpt"):
+                response = self._send_openai(prompt, images)
+            else:
+                # Default to the original implementation using WildCard
+                payload = self._create_payload(prompt, images=images)
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"
+                }
+                print("Waiting for LLM to be generated")
+                # Use appropriate API depending on environment variables
+                if os.getenv("ANTHROPIC_API_KEY"):
+                    # Use direct Anthropic API
+                    response = self._send_anthropic(prompt, images)
+                elif os.getenv("OPENROUTER_API_KEY"):
+                    # Use OpenRouter
+                    response = self._send_openrouter(prompt, images)
+                else:
+                    # Fallback to WildCard
+                    response = requests.post("https://api.gptsapi.net/v1/chat/completions", headers=headers, json=payload,
+                                         timeout=(5, 120))  # WildCard
+                    print(f"LLM response: {response.text}")
+                    try:
+                        response = response.json()['choices'][0]['message']['content']
+                    except Exception as e:
+                        print(f"$ --- Error Response: {response.json()}\n")
+                        raise e
         else:
             response = read(file_path)
+        
         self.past_messages.append({"role": "assistant", "content": response})
         self.past_responses.append(response)
+
+    def _send_anthropic(self, prompt: str, images: list[str] = []) -> str:
+        """Send request to Anthropic Claude API"""
+        try:
+            import anthropic
+            
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+            if not api_key:
+                raise ValueError("ANTHROPIC_API_KEY not found in environment variables")
+                
+            client = anthropic.Anthropic(api_key=api_key)
+            
+            messages = []
+            
+            # Add image content if provided
+            for image in images:
+                with open(image, "rb") as img_file:
+                    image_data = base64.b64encode(img_file.read()).decode("utf-8")
+                    mime_type, _ = mimetypes.guess_type(image)
+                    if not mime_type:
+                        mime_type = "image/png"  # Default to PNG if can't determine
+                        
+                    messages.append({
+                        "role": "user",
+                        "content": [{
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": mime_type,
+                                "data": image_data
+                            }
+                        }]
+                    })
+            
+            # Add text content
+            messages.append({
+                "role": "user",
+                "content": prompt
+            })
+            
+            # For backwards compatibility
+            if not messages and not images:
+                messages = [{"role": "user", "content": prompt}]
+                
+            response = client.messages.create(
+                model=self.model,
+                system=self.predefined_prompts["system"],
+                messages=messages,
+                max_tokens=4096
+            )
+            
+            return response.content[0].text
+        except Exception as e:
+            print(f"Error sending to Anthropic: {str(e)}")
+            raise
+
+    def _send_openai(self, prompt: str, images: list[str] = []) -> str:
+        """Send request to OpenAI API"""
+        try:
+            import openai
+            
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("OPENAI_API_KEY not found in environment variables")
+                
+            client = openai.OpenAI(api_key=api_key)
+            
+            messages = []
+            
+            # Add system message
+            messages.append({
+                "role": "system", 
+                "content": self.predefined_prompts["system"]
+            })
+            
+            # Add images if provided
+            if images:
+                content = []
+                for image in images:
+                    with open(image, "rb") as img_file:
+                        encoded_image = base64.b64encode(img_file.read()).decode('utf-8')
+                        mime_type, _ = mimetypes.guess_type(image)
+                        if not mime_type:
+                            mime_type = "image/png"
+                        
+                        content.append({
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{mime_type};base64,{encoded_image}",
+                                "detail": "high"
+                            }
+                        })
+                
+                content.append({
+                    "type": "text",
+                    "text": prompt
+                })
+                
+                messages.append({
+                    "role": "user",
+                    "content": content
+                })
+            else:
+                # No images, just text
+                messages.append({
+                    "role": "user",
+                    "content": prompt
+                })
+            
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                max_tokens=4096
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Error sending to OpenAI: {str(e)}")
+            raise
+
+    def _send_openrouter(self, prompt: str, images: list[str] = []) -> str:
+        """Send request to OpenRouter API"""
+        try:
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            if not api_key:
+                raise ValueError("OPENROUTER_API_KEY not found in environment variables")
+            
+            # Use specified model or default to a known one on OpenRouter
+            model = self.model
+            if not model.startswith("openai/") and not model.startswith("anthropic/"):
+                # Try to map to a known model on OpenRouter
+                if model.startswith("gpt"):
+                    model = f"openai/{model}"
+                elif model.startswith("claude"):
+                    model = f"anthropic/{model}"
+            
+            # Import OpenRouter or use requests directly
+            try:
+                from openrouter import OpenRouter
+                client = OpenRouter(api_key=api_key)
+                
+                messages = []
+                
+                # Add system message
+                system_message = self.predefined_prompts["system"]
+                
+                # Add images if provided (only for models that support them)
+                if "gpt-4" in model or "claude" in model:
+                    if images:
+                        content = []
+                        for image in images:
+                            with open(image, "rb") as img_file:
+                                encoded_image = base64.b64encode(img_file.read()).decode('utf-8')
+                                mime_type, _ = mimetypes.guess_type(image)
+                                if not mime_type:
+                                    mime_type = "image/png"
+                                
+                                content.append({
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:{mime_type};base64,{encoded_image}",
+                                    }
+                                })
+                        
+                        content.append({
+                            "type": "text",
+                            "text": prompt
+                        })
+                        
+                        messages = [
+                            {"role": "system", "content": system_message},
+                            {"role": "user", "content": content}
+                        ]
+                    else:
+                        messages = [
+                            {"role": "system", "content": system_message},
+                            {"role": "user", "content": prompt}
+                        ]
+                
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    max_tokens=4096
+                )
+                
+                return response.choices[0].message.content
+            except ImportError:
+                # Fallback to using requests
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}",
+                    "HTTP-Referer": "chat2svg.github.io", 
+                    "X-Title": "Chat2SVG"
+                }
+                
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": self.predefined_prompts["system"]},
+                        {"role": "user", "content": prompt}
+                    ]
+                }
+                
+                # Images are not supported in this fallback mode
+                if images:
+                    print("Warning: Images not supported in fallback mode for OpenRouter")
+                
+                response = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=(5, 120)
+                )
+                
+                if response.status_code != 200:
+                    print(f"Error from OpenRouter: {response.text}")
+                    raise Exception(f"OpenRouter API error: {response.status_code}")
+                    
+                return response.json()["choices"][0]["message"]["content"]
+                
+        except Exception as e:
+            print(f"Error sending to OpenRouter: {str(e)}")
+            raise
 
     def _create_payload(self, prompt: str, images: list[str] = []):
         """Creates the payload for the API request."""
